@@ -13,7 +13,7 @@ class Museo(models.Model):
     contentURL = models.URLField()
     distrito = models.CharField(max_length=32)
     telefono = models.TextField()
-    email = EmailField()
+    email = models.EmailField()
 
     #def __str__(self):
         #return self.name
@@ -27,7 +27,7 @@ class Seleccion(models.Model):
 class Comentario(models.Model):
     museo = models.ForeignKey(Museo)
     texto = models.TextField()
-    fecha = DateTimeField(auto_now=True)
+    fecha = models.DateTimeField(auto_now=True)
 
     #def __str__(self):
         #return self.grupo.nombre + " " + str(self.fecha)
