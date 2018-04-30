@@ -11,20 +11,24 @@ def xmlParser(req):
     xmlFile = urlopen(XML_URL)
     tree = ET.parse(xmlFile)
     root = tree.getroot()
-    i = 0
+    #i = 0
     #for child in root.iter('atributo'):
     #    i += 1
     #    print(child.tag, child.attrib)
     #    print("")
     #    if i>6:
     #        break
-    for i in root.iter('contenido'):
-        print("")
-        for museos in i.findall('atributos'):
-            #name = museos.get('idioma')
-            print (museos.find('atributo').text)
-            #print (name)
-
+    for listMuseos in root.iter('contenido'):
+        try:
+            print("-----------------------------------------")
+            for museo in listMuseos.findall('atributos'):
+                #name = museos.get('idioma')
+                nombre = museo.find('atributo[@nombre="NOMBRE"]').text
+                #descripcion = museo.find('atributo[@nombre="DESCRIPCION-ENTIDAD"]').text
+                print (nombre)
+                #print (name)
+        except AttributeError:
+            continue
 
     #for i in root.iter('contenido'):
     #    print (i.tag, i.attrib)
