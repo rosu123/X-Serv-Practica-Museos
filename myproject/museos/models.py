@@ -9,19 +9,23 @@ class Museo(models.Model):
     descripcion = models.TextField()
     horario = models.TextField()
     transporte = models.TextField()
-    accesibilidad = models.BinaryField()
+    #accesibilidad = models.BinaryField()
+    accesibilidad = models.BooleanField()
     contentURL = models.URLField()
     distrito = models.CharField(max_length=32)
     telefono = models.TextField()
     email = models.EmailField()
 
-    #def __str__(self):
-        #return self.name
+    def __str__(self):
+        return self.nombre
 
 
 class Seleccion(models.Model):
     museo = models.ForeignKey(Museo)
     user = models.CharField(max_length=32)
+
+    #def __str__(self):
+    #    return self.user + "(Museo: " + self.museo.nombre + ")"
 
 
 class Comentario(models.Model):
@@ -29,8 +33,8 @@ class Comentario(models.Model):
     texto = models.TextField()
     fecha = models.DateTimeField(auto_now=True)
 
-    #def __str__(self):
-        #return self.grupo.nombre + " " + str(self.fecha)
+    def __str__(self):
+        return self.museo.nombre + " " + str(self.fecha)
 
 
 class Configuracion(models.Model):

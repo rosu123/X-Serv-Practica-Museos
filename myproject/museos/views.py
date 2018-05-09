@@ -30,12 +30,14 @@ def xmlParser(req):
                 print (horario)
                 transporte = museo.find('atributo[@nombre="TRANSPORTE"]').text
                 print (transporte)
-                accesibilidad = int(museo.find('atributo[@nombre="ACCESIBILIDAD"]').text,2)
+
+                #accesibilidad = int(museo.find('atributo[@nombre="ACCESIBILIDAD"]').text,2)
+                if museo.find('atributo[@nombre="ACCESIBILIDAD"]').text == "0":
+                    accesibilidad = False
+                else:
+                    accesibilidad = True
                 print (accesibilidad)
-                #if i.find('atributos/atributo[@nombre="ACCESIBILIDAD"]').text == "0":
-                #    accesibilidad = False
-                #else:
-                #    accesibilidad = True
+
                 contentURL = museo.find('atributo[@nombre="CONTENT-URL"]').text
                 print (contentURL)
                 localizacion = museo.find('atributo[@nombre="LOCALIZACION"]')
@@ -70,7 +72,9 @@ def xmlParser(req):
         museo = Museo(idEntidad = idEntidad, nombre = nombre, descripcion = descripcion, horario = horario, transporte = transporte,
                       accesibilidad = accesibilidad, contentURL = contentURL, distrito = distrito, telefono = telefono,
                       email = email)
+        print("!!!!!!!!!!!!!!!!!!!!!!!!! Antes de guardar Museo !!!!!!!!!!!!!!!!!!!!!!!!!")
         museo.save()
+        print("!!!!!!!!!!!!!!!!!!!!!!!!! Despues de guardar Museo !!!!!!!!!!!!!!!!!!!!!!!!!")
     #for i in root.iter('contenido'):
     #    print (i.tag, i.attrib)
 
