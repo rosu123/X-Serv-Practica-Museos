@@ -10,14 +10,14 @@ class Museo(models.Model):
     horario = models.TextField()
     transporte = models.TextField()
     #accesibilidad = models.BinaryField()
-    accesibilidad = models.BooleanField()
+    accesibilidad = models.BooleanField(default=False)
     contentURL = models.URLField()
     distrito = models.CharField(max_length=32)
     telefono = models.TextField()
     email = models.EmailField()
 
     def __str__(self):
-        return self.nombre
+        return self.nombre + " Accesibilidad: " + str(self.accesibilidad)
 
 
 class Seleccion(models.Model):
