@@ -14,6 +14,7 @@ class Museo(models.Model):
     contentURL = models.URLField()
     distrito = models.CharField(max_length=32)
     telefono = models.TextField()
+    numero_comentarios = models.IntegerField(default=0)
     email = models.EmailField()
 
     def __str__(self):

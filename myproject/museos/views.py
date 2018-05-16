@@ -3,6 +3,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 import xml.etree.ElementTree as ET
 from urllib.request import urlopen
 from museos.models import Museo
+from museos.models import Comentario
+from museos.models import Seleccion
+from museos.models import Configuracion
 
 
 # Create your views here.
@@ -12,6 +15,7 @@ def xmlParser(req):
     xmlFile = urlopen(XML_URL)
     tree = ET.parse(xmlFile)
     root = tree.getroot()
+    Museo.objects.all().delete()
     for listMuseos in root.iter('contenido'):
         try:
             print("-----------------------------------------")
@@ -56,6 +60,11 @@ def xmlParser(req):
                     print ("Campo telefono NO encontrado")
                     pass
 
+                #numero_comentarios = Comentario.objects.filter(museo__nombre__contains=nombre).count()
+                #print ("Numero comentarios: " + str(numero_comentarios))
+
+
+
                 try:
                     email = datosContacto.find('atributo[@nombre="EMAIL"]').text
                     print (email)
@@ -71,7 +80,7 @@ def xmlParser(req):
 
         museo = Museo(idEntidad = idEntidad, nombre = nombre, descripcion = descripcion, horario = horario, transporte = transporte,
                       accesibilidad = accesibilidad, contentURL = contentURL, distrito = distrito, telefono = telefono,
-                      email = email)
+                      numero_comentarios = numero_comentarios, email = email)
         print("!!!!!!!!!!!!!!!!!!!!!!!!! Antes de guardar Museo !!!!!!!!!!!!!!!!!!!!!!!!!")
         museo.save()
         print("!!!!!!!!!!!!!!!!!!!!!!!!! Despues de guardar Museo !!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -81,3 +90,42 @@ def xmlParser(req):
     resp = "<a href=/xml>Cargar xml</a>"
     return HttpResponse(resp)
     #return HttpResponseRedirect('/')
+
+
+
+
+'''
+@csrf_exempt
+def barra(req):
+    if request.method == "GET":
+
+        museo = Museo.objects.all()
+        aparcs = aparcs.exclude(num_comentarios=0)
+        aparcs = aparcs.order_by('-num_comentarios')
+        if acc:
+            aparcs = aparcs.exclude(accesibilidad=False)
+        return aparcs[:5]
+
+
+        try:
+            list_urls = Pages.objects.all()
+            resp += "<p>Saved URLs:</p>"
+            resp += "<ol>"
+            #print(resp)
+            for pag in list_urls:
+                resp += '<li><a href="' + str(pag.id) + '">' + pag.name + "  (" + pag.page + ')</a></li>'
+            resp += "</ol>"
+            return HttpResponse(resp)
+
+
+        return HttpResponse(resp)
+'''
+
+'''
+def add_comentario(texto, aparcamiento):
+    """Añade un comentario a la base de datos"""
+    comment = Comentario(texto=texto, aparcamiento=aparcamiento)
+    comment.save()
+    aparcamiento.num_comentarios += 1
+    aparcamiento.save()
+'''
