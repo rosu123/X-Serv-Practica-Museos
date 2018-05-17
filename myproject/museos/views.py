@@ -7,7 +7,7 @@ from museos.models import Comentario
 from museos.models import Seleccion
 from museos.models import Configuracion
 
-from .forms import NameForm
+from museos.forms import nuevoComentario
 
 
 # Create your views here.
@@ -99,22 +99,25 @@ def cargarComentario(request):
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
-        form = NameForm(request.POST)
+        form = nuevoComentario(request.POST)
         # check whether it's valid:
         if form.is_valid():
-            # process the data in form.cleaned_data as required
-            # ...
-            # redirect to a new URL:
-            print(form.cleaned_data)
+            nuevo_comentario = Comentario()
+            nuevo_comentario.museo = form.cleaned_data['museo']
+            nuevo_comentario.texto = form.cleaned_data['comentario']
+            #print(form.cleaned_data)
+            nuevo_comentario.save()
+
             return HttpResponseRedirect('/thanks/')
         else:
             print("IT IS NOT VALID")
 
     # if a GET (or any other method) we'll create a blank form
     else:
-        form = NameForm()
+        form = nuevoComentario()
 
-    return render(request, 'name.html', {'form': form})
+    context = {'form': form}
+    return render(request, 'name.html', context)
 
 
 

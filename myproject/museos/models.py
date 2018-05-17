@@ -20,6 +20,9 @@ class Museo(models.Model):
     def __str__(self):
         return self.nombre + " Accesibilidad: " + str(self.accesibilidad)
 
+    class Meta:
+        ordering = ['nombre']
+
 
 class Seleccion(models.Model):
     museo = models.ForeignKey(Museo)
