@@ -7,6 +7,8 @@ from museos.models import Comentario
 from museos.models import Seleccion
 from museos.models import Configuracion
 
+from .forms import NameForm
+
 
 # Create your views here.
 XML_URL = 'https://datos.madrid.es/portal/site/egob/menuitem.ac61933d6ee3c31cae77ae7784f1a5a0/?vgnextoid=00149033f2201410VgnVCM100000171f5a0aRCRD&format=xml&file=0&filename=201132-0-museos&mgmtid=118f2fdbecc63410VgnVCM1000000b205a0aRCRD&preview=full'
@@ -60,7 +62,7 @@ def xmlParser(req):
                     print ("Campo telefono NO encontrado")
                     pass
 
-                #numero_comentarios = Comentario.objects.filter(museo__nombre__contains=nombre).count()
+                numero_comentarios = Comentario.objects.filter(museo__nombre__contains=nombre).count()
                 #print ("Numero comentarios: " + str(numero_comentarios))
 
 
@@ -90,6 +92,29 @@ def xmlParser(req):
     resp = "<a href=/xml>Cargar xml</a>"
     return HttpResponse(resp)
     #return HttpResponseRedirect('/')
+
+
+
+def cargarComentario(request):
+    # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = NameForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            # ...
+            # redirect to a new URL:
+            print(form.cleaned_data)
+            return HttpResponseRedirect('/thanks/')
+        else:
+            print("IT IS NOT VALID")
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = NameForm()
+
+    return render(request, 'name.html', {'form': form})
 
 
 

@@ -19,4 +19,5 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     #url(r'^$', 'museos.views.barra'),
     url(r'^xml/', 'museos.views.xmlParser'),
+    url(r'^comentario/', 'museos.views.cargarComentario'),
 ]
