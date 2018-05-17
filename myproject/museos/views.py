@@ -107,6 +107,9 @@ def cargarComentario(request):
             nuevo_comentario.texto = form.cleaned_data['comentario']
             #print(form.cleaned_data)
             nuevo_comentario.save()
+            ####
+            #Actualizar numero de comentraios del museo
+            ####
 
             return HttpResponseRedirect('/thanks/')
         else:
