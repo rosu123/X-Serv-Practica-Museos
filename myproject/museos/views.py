@@ -137,24 +137,45 @@ def museos_acc(req):
 
 @csrf_exempt
 def museos_distrito(request):
-    form = filtrarDistrito()
-    #distritos = set(Museo.objects.order_by('distrito'))
-    #distritos = Museo.objects..unique().values_list('distrito')
-    distritos = set(Museo.objects.values_list('distrito',flat=True).order_by('distrito'))
-    print(distritos)
-    distritos2 = list(set(Museo.objects.all().values_list('distrito')))
-    print(distritos2)
-    museos = Museo.objects.all()
-    '''
-    resp = ""
-    for museo in museos:
-        #print(museo.nombre)
-        resp += '<li><a href="/museo/' + str(museo.id) + '">' + str(museo.nombre) + '</a></li>'
+    if request.method == "GET":
+        form = filtrarDistrito()
+        #distritos = set(Museo.objects.order_by('distrito'))
+        #distritos = Museo.objects..unique().values_list('distrito')
+        distritos = set(Museo.objects.values_list('distrito',flat=True).order_by('distrito'))
+        print(distritos)
+        distritos2 = list(set(Museo.objects.all().values_list('distrito')))
+        print(distritos2)
+        museos = Museo.objects.all()
+        '''
+        resp = ""
+        for museo in museos:
+            #print(museo.nombre)
+            resp += '<li><a href="/museo/' + str(museo.id) + '">' + str(museo.nombre) + '</a></li>'
 
-    '''
-    context = {'form': form, 'lista_distritos': distritos, 'lista_museos': museos}
-    return render(request, 'barra_museos.html', context)
+        '''
+        distrito = "Todos"
+        #context = {'form': form, 'lista_museos': museos, 'distrito': distrito}
+        #return render(request, 'barra_museos.html', context)
     #return HttpResponse(resp)
+    elif request.method == "POST":
+        #print(form.errors)
+        distrito = request.POST.get('distrito')
+        print("|" + distrito + "|")
+        form = filtrarDistrito()
+        if distrito != "":
+            print("Mi distrito: " + distrito)
+            museos = Museo.objects.filter(distrito=distrito)
+
+            #return HttpResponseRedirect('/thanks/')
+            #context = {'form': form, 'lista_museos': museos_filtrados, 'distrito': distrito}
+            #return render(request, 'barra_museos.html', context)
+        else:
+            museos = Museo.objects.all()
+            distrito = "Todos"
+            #return HttpResponse("Funciona mal!")
+
+    context = {'form': form, 'lista_museos': museos, 'distrito': distrito}
+    return render(request, 'barra_museos.html', context)
 
 
 

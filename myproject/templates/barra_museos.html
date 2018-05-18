@@ -1,33 +1,28 @@
 
-    <div id="primarycontainer">
-      <div class="box">
-        <h2>Filtrar museos por distrito:</h2>
-        <form method="post" action="/museos">
-            <select name="opciones">
-                {% for distrito in lista_distritos %}
-                    {% if distrito == "" %}
-                        <option value="">No especificado</option>
-                    {% else %}
-                        <option value="{{ distrito }}">{{ distrito }}</option>
-                    {% endif %}
-                {% endfor %}
-                    <option value="Todos" selected>Todos</option>
-            </select>
-            <input type="submit" name="filtro" value="Filtar">
-        </form>
-        <hr />
-      </div>
-    </div>
+<div id="primarycontainer">
+   <div class="box">
+      <h2>Filtrar museos por distrito:</h2>
+         <form method="post" action="/museos">
+            {% csrf_token %}
+            <!--{{ form.as_p }}-->
+            <div class="fieldWrapper">
+               {{ form.as_p }}
+            </div>
+            <input type="submit" value="Submit" />
+         </form>
+      <hr />
+   </div>
+</div>
 
 
   <div id="secondarycontent">
-    <br/><h2><center><em><u>Museos seleccionados</u></em></center></h2><br/>
+    <br/><h2><center><em><u>Museos seleccionados: {{ distrito }} </u></em></center></h2><br/>
     <br/><br/>
     <div id="secondarycontent">
       {% for museo in lista_museos %}
-          <h1>{{ museo.nombre }}</h1>
-          <p><a href="/museo/{{ museo.id }}">
-          Pulse aquí para ver su página</a></p><br /><br />
+          <h3>{{ museo.nombre }}</h3>
+          <a href="/museo/{{ museo.id }}">
+          Pulse aquí para ver su página</a><br />
 
       {% endfor %}
     </div>

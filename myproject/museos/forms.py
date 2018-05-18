@@ -10,4 +10,4 @@ class nuevoComentario(forms.Form):
 
 
 class filtrarDistrito(forms.Form):
-    distrito = forms.ModelChoiceField(label='Distrito', queryset=set(Museo.objects.values_list('distrito',flat=True).order_by('distrito')))
+    distrito = forms.ModelChoiceField(label='Distrito', queryset=Museo.objects.values_list('distrito',flat=True).order_by('distrito').distinct())
