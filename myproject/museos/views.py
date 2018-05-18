@@ -2,12 +2,15 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 import xml.etree.ElementTree as ET
 from urllib.request import urlopen
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Count
 from museos.models import Museo
 from museos.models import Comentario
 from museos.models import Seleccion
 from museos.models import Configuracion
 
 from museos.forms import nuevoComentario
+from museos.forms import filtrarDistrito
 
 
 # Create your views here.
@@ -62,7 +65,7 @@ def xmlParser(req):
                     print ("Campo telefono NO encontrado")
                     pass
 
-                numero_comentarios = Comentario.objects.filter(museo__nombre__contains=nombre).count()
+                #numero_comentarios = Comentario.objects.filter(museo__nombre__contains=nombre).count()
                 #print ("Numero comentarios: " + str(numero_comentarios))
 
 
@@ -82,7 +85,7 @@ def xmlParser(req):
 
         museo = Museo(idEntidad = idEntidad, nombre = nombre, descripcion = descripcion, horario = horario, transporte = transporte,
                       accesibilidad = accesibilidad, contentURL = contentURL, distrito = distrito, telefono = telefono,
-                      numero_comentarios = numero_comentarios, email = email)
+                      email = email)
         print("!!!!!!!!!!!!!!!!!!!!!!!!! Antes de guardar Museo !!!!!!!!!!!!!!!!!!!!!!!!!")
         museo.save()
         print("!!!!!!!!!!!!!!!!!!!!!!!!! Despues de guardar Museo !!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -107,9 +110,7 @@ def cargarComentario(request):
             nuevo_comentario.texto = form.cleaned_data['comentario']
             #print(form.cleaned_data)
             nuevo_comentario.save()
-            ####
-            #Actualizar numero de comentraios del museo
-            ####
+
 
             return HttpResponseRedirect('/thanks/')
         else:
@@ -123,13 +124,67 @@ def cargarComentario(request):
     return render(request, 'name.html', context)
 
 
+def museos_acc(req):
+    museos_accesibles = Museo.objects.filter(accesibilidad=True)
+    resp = ""
+    for museo in museos_accesibles:
+        print(museo.nombre)
+        resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a></li>'
+    resp += '<form action="/" ><button type="submit">Click</button></form>'
 
 
-'''
+    return HttpResponse(resp)
+
 @csrf_exempt
-def barra(req):
-    if request.method == "GET":
+def museos_distrito(request):
+    form = filtrarDistrito()
+    #distritos = set(Museo.objects.order_by('distrito'))
+    #distritos = Museo.objects..unique().values_list('distrito')
+    distritos = set(Museo.objects.values_list('distrito',flat=True).order_by('distrito'))
+    print(distritos)
+    distritos2 = list(set(Museo.objects.all().values_list('distrito')))
+    print(distritos2)
+    museos = Museo.objects.all()
+    '''
+    resp = ""
+    for museo in museos:
+        #print(museo.nombre)
+        resp += '<li><a href="/museo/' + str(museo.id) + '">' + str(museo.nombre) + '</a></li>'
 
+    '''
+    context = {'form': form, 'lista_distritos': distritos, 'lista_museos': museos}
+    return render(request, 'barra_museos.html', context)
+    #return HttpResponse(resp)
+
+
+
+
+@csrf_exempt
+def barra(request):
+    if request.method == "GET":
+        count_mess = Museo.objects.annotate(number_of_comments=Count('comentario')).filter(number_of_comments__gte=1).order_by('-number_of_comments')[:5]
+        #print("LLEGO HASTA AQUI")
+        #aux = number_of_comments.filter()
+        #print("Num museos con comentarios: " + str(count_mess[0].number_of_comments))
+        #print(count_mess)
+        resp = "<p><h2>TOP 5 commented museums:</h2></p>"
+        resp += "<ol>"
+        for museo in count_mess:
+            print(museo.nombre)
+            resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a>'
+            resp += ': (' + str(museo.distrito) + ")"
+            resp += ' <a href="/museo/' + str(museo.id) + '"> (Más información)</a></li>'
+        resp += "</ol>"
+        #resp += '<form method="link" action="/acces/">'
+        #resp += '<input type="button" value="Start"></form>'
+        resp += '<form action="/acces/" ><button type="submit">Click</button></form>'
+
+        return HttpResponse(resp)
+
+
+
+
+        '''
         museo = Museo.objects.all()
         aparcs = aparcs.exclude(num_comentarios=0)
         aparcs = aparcs.order_by('-num_comentarios')
@@ -147,16 +202,6 @@ def barra(req):
                 resp += '<li><a href="' + str(pag.id) + '">' + pag.name + "  (" + pag.page + ')</a></li>'
             resp += "</ol>"
             return HttpResponse(resp)
+        '''
 
-
-        return HttpResponse(resp)
-'''
-
-'''
-def add_comentario(texto, aparcamiento):
-    """Añade un comentario a la base de datos"""
-    comment = Comentario(texto=texto, aparcamiento=aparcamiento)
-    comment.save()
-    aparcamiento.num_comentarios += 1
-    aparcamiento.save()
-'''
+    #return HttpResponseRedirect('/thanks/')
