@@ -1,0 +1,25 @@
+<div id="primarycontainer">
+	<div class="box">
+		<h2><em><u>{{ museo.nombre }}</u></em></h2></br>
+			<p><b><u>Descripción:</u></b> {{ museo.descripcion|default:"no especificado"  }}</p>
+			<p><b><u>Horario:</u></b> {{ museo.horario|default:"no especificado"  }}</p>
+			<p><b><u>Transporte:</u></b> {{ museo.transporte|default:"no especificado"  }}</p>
+			{% if museo.accesibilidad %}
+				<p><b><u>Accesibilidad:</u></b> Si</p>
+			{% else %}
+				<p><b><u>Accesibilidad:</u></b> No</p>
+			{% endif %}
+
+			<p><b><u>URL:</u></b> <a href={{ museo.contentURL }}>{{ museo.contentURL|default:"no especificado"  }}</a></p>
+			<p><b><u>Dirección:</u></b> {{ museo.claseVial }} {{ museo.nombreVia }}, {{ museo.numero }} {{ museo.codPostal }} {{ museo.localidad }}</p>
+			<p><b><u>Barrio / Distrito:</u></b> {{ museo.barrio|default:"no especificado"  }} / {{ museo.distrito|default:"no especificado"  }}</p>
+			<p><b><u>Contacto:</u></b> {{ museo.telefono|default:"no especificado"  }} / {{ museo.email|default:"no especificado"  }}</p>
+			<p><b><u>Comentarios:</u></b></p>
+			<ul style="list-style-type:square">
+			{% for comentario in comentarios %}
+				 <li>{{ comentario.texto }}<br /></li>
+			{% endfor %}
+		</ul>
+		<hr />
+	</div>
+</div>

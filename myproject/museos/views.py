@@ -19,6 +19,151 @@ from museos.forms import filtrarDistrito
 # Create your views here.
 XML_URL = 'https://datos.madrid.es/portal/site/egob/menuitem.ac61933d6ee3c31cae77ae7784f1a5a0/?vgnextoid=00149033f2201410VgnVCM100000171f5a0aRCRD&format=xml&file=0&filename=201132-0-museos&mgmtid=118f2fdbecc63410VgnVCM1000000b205a0aRCRD&preview=full'
 
+
+def cargarComentario(request):
+    # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = nuevoComentario(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            nuevo_comentario = Comentario()
+            nuevo_comentario.museo = form.cleaned_data['museo']
+            nuevo_comentario.texto = form.cleaned_data['comentario']
+            #print(form.cleaned_data)
+            nuevo_comentario.save()
+
+
+            return HttpResponseRedirect('/')
+        else:
+            print("IT IS NOT VALID")
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = nuevoComentario()
+
+    context = {'form': form}
+    return render(request, 'name.html', context)
+
+
+def museosAcc(req):
+    museos_accesibles = Museo.objects.filter(accesibilidad=True)
+    resp = ""
+    for museo in museos_accesibles:
+        print(museo.nombre)
+        resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a></li>'
+    resp += '<form action="/" ><button type="submit">Página principal</button></form>'
+
+
+    return HttpResponse(resp)
+
+
+def detallesMuseo(request, identificador):
+    try:
+        museo = Museo.objects.get(id=identificador)
+        resp = museo.nombre
+    except ObjectDoesNotExist:
+        resp = "ID inválido"
+        return HttpResponse(resp)
+
+    comentarios = Comentario.objects.filter(museo__nombre__contains=museo.nombre)
+    if comentarios.count() != 0:
+        resp += comentarios[0].texto
+        print("Comentarios: " + comentarios[0].texto)
+    else:
+        resp += "Museo sin comentarios"
+
+
+    #return HttpResponse(resp)
+    context = {'museo': museo, 'comentarios': comentarios}
+    return render(request, 'detalles_museo.html', context)
+
+
+def about(request):
+    resp = "<br>Autor: Rodrigo Perela Posada</br>"
+    resp += "<br>ITT-IAA ETSIT</br>"
+    context = {'respuesta': resp}
+    return render(request, 'about.html', context)
+
+
+
+
+
+@csrf_exempt
+def museosDistrito(request):
+    if request.method == "GET":
+        form = filtrarDistrito()
+        #distritos = set(Museo.objects.order_by('distrito'))
+        #distritos = Museo.objects..unique().values_list('distrito')
+        distritos = set(Museo.objects.values_list('distrito',flat=True).order_by('distrito'))
+        print(distritos)
+        distritos2 = list(set(Museo.objects.all().values_list('distrito')))
+        print(distritos2)
+        museos = Museo.objects.all()
+        '''
+        resp = ""
+        for museo in museos:
+            #print(museo.nombre)
+            resp += '<li><a href="/museo/' + str(museo.id) + '">' + str(museo.nombre) + '</a></li>'
+
+        '''
+        distrito = "Todos"
+        #context = {'form': form, 'lista_museos': museos, 'distrito': distrito}
+        #return render(request, 'barra_museos.html', context)
+    #return HttpResponse(resp)
+    elif request.method == "POST":
+        #print(form.errors)
+        distrito = request.POST.get('distrito')
+        print("|" + distrito + "|")
+        form = filtrarDistrito()
+        if distrito != "":
+            print("Mi distrito: " + distrito)
+            museos = Museo.objects.filter(distrito=distrito)
+
+            #return HttpResponseRedirect('/thanks/')
+            #context = {'form': form, 'lista_museos': museos_filtrados, 'distrito': distrito}
+            #return render(request, 'barra_museos.html', context)
+        else:
+            museos = Museo.objects.all()
+            distrito = "Todos"
+            #return HttpResponse("Funciona mal!")
+
+    context = {'form': form, 'lista_museos': museos, 'distrito': distrito}
+    return render(request, 'barra_museos.html', context)
+
+
+
+
+@csrf_exempt
+def barra(request):
+    if request.method == "GET":
+        count_mess = Museo.objects.annotate(number_of_comments=Count('comentario')).filter(number_of_comments__gte=1).order_by('-number_of_comments')[:5]
+        #print("LLEGO HASTA AQUI")
+        #aux = number_of_comments.filter()
+        #print("Num comentarios primer : " + str(count_mess[0].number_of_comments))
+        #print(count_mess)
+        resp = "<p><h2>TOP 5 commented museums:</h2></p>"
+        print("Numero museos con comentarios: " + str(count_mess.count()))
+        if count_mess.count() != 0:
+            resp += "<ol>"
+            i = 0
+            for museo in count_mess:
+                print(museo.nombre)
+                resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a>: ' + str(Comentario.objects.filter(museo__nombre__contains=museo.nombre).count()) + ' comentario(s)</br>'
+                resp += str(museo.claseVial) + " " + str(museo.nombreVia) + ", " + str(museo.numero) + " " + str(museo.codPostal) + " " + str(museo.localidad) + "</br>"
+                resp += "Barrio / Distrito " + str(museo.barrio) + " / " + str(museo.distrito) + "</br>"
+                resp += ' <a href="/museos/' + str(museo.id) + '"> (Más información)</a></li></br>'
+                i = i + 1
+            resp += "</ol>"
+        else:
+            resp += "No comments yet!</br></br>"
+        #resp += '<form method="link" action="/acces/">'
+        #resp += '<input type="button" value="Start"></form>'
+        resp += '<form action="/acces/" ><button type="submit">Museos accesibles</button></form>'
+
+        return HttpResponse(resp)
+
+
 def xmlParser(req):
     xmlFile = urlopen(XML_URL)
     tree = ET.parse(xmlFile)
@@ -28,20 +173,41 @@ def xmlParser(req):
         try:
             print("-----------------------------------------")
             for museo in listMuseos.findall('atributos'):
-                idEntidad = museo.find('atributo[@nombre="ID-ENTIDAD"]').text
-                print (idEntidad)
-                nombre = museo.find('atributo[@nombre="NOMBRE"]').text
-                print (nombre)
+                try:
+                    nombre = museo.find('atributo[@nombre="NOMBRE"]').text
+                    print (nombre)
+                except AttributeError:
+                    print ("Campo nombre NO encontrado")
+                    pass
+
                 try:
                     descripcion = museo.find('atributo[@nombre="DESCRIPCION-ENTIDAD"]').text
+                    print (descripcion)
                 except AttributeError:
+                    descripcion = " "
                     print ("Campo descripcion NO encontrado")
                     pass
-                print (descripcion)
-                horario = museo.find('atributo[@nombre="HORARIO"]').text
-                print (horario)
-                transporte = museo.find('atributo[@nombre="TRANSPORTE"]').text
-                print (transporte)
+
+                try:
+                    descripcion += museo.find('atributo[@nombre="DESCRIPCION"]').text
+                    print (descripcion)
+                except AttributeError:
+                    print ("Campo descripcion2 NO encontrado")
+                    pass
+
+                try:
+                    horario = museo.find('atributo[@nombre="HORARIO"]').text
+                    print (horario)
+                except AttributeError:
+                    print ("Campo horario NO encontrado")
+                    pass
+
+                try:
+                    transporte = museo.find('atributo[@nombre="TRANSPORTE"]').text
+                    print (transporte)
+                except AttributeError:
+                    print ("Campo transporte NO encontrado")
+                    pass
 
                 #accesibilidad = int(museo.find('atributo[@nombre="ACCESIBILIDAD"]').text,2)
                 if museo.find('atributo[@nombre="ACCESIBILIDAD"]').text == "0":
@@ -50,9 +216,12 @@ def xmlParser(req):
                     accesibilidad = True
                 print (accesibilidad)
 
-                contentURL = museo.find('atributo[@nombre="CONTENT-URL"]').text
-                print (contentURL)
-
+                try:
+                    contentURL = museo.find('atributo[@nombre="CONTENT-URL"]').text
+                    print (contentURL)
+                except AttributeError:
+                    print ("Campo contentURL NO encontrado")
+                    pass
 
 
                 localizacion = museo.find('atributo[@nombre="LOCALIZACION"]')
@@ -122,150 +291,15 @@ def xmlParser(req):
 
 
 
-        museo = Museo(idEntidad = idEntidad, nombre = nombre, descripcion = descripcion, horario = horario, transporte = transporte,
+        museo = Museo(nombre = nombre, descripcion = descripcion, horario = horario, transporte = transporte,
                       accesibilidad = accesibilidad, contentURL = contentURL, nombreVia = nombre_via, claseVial = clase_vial,
                       numero = numero, localidad = localidad, codPostal = cod_postal, barrio = barrio, distrito = distrito,
                       telefono = telefono, email = email)
         print("!!!!!!!!!!!!!!!!!!!!!!!!! Antes de guardar Museo !!!!!!!!!!!!!!!!!!!!!!!!!")
         museo.save()
         print("!!!!!!!!!!!!!!!!!!!!!!!!! Despues de guardar Museo !!!!!!!!!!!!!!!!!!!!!!!!!")
-
+        nombre = descripcion = horario = transporte = accesibilidad = contentURL = None
+        nombre_via = clase_vial = numero = localidad = cod_postal = barrio = distrito = telefono = email = None
     #resp = "<a href=/xml>Cargar xml</a>"
     #return HttpResponse(resp)
     return HttpResponseRedirect('/')
-
-
-
-def cargarComentario(request):
-    # if this is a POST request we need to process the form data
-    if request.method == 'POST':
-        # create a form instance and populate it with data from the request:
-        form = nuevoComentario(request.POST)
-        # check whether it's valid:
-        if form.is_valid():
-            nuevo_comentario = Comentario()
-            nuevo_comentario.museo = form.cleaned_data['museo']
-            nuevo_comentario.texto = form.cleaned_data['comentario']
-            #print(form.cleaned_data)
-            nuevo_comentario.save()
-
-
-            return HttpResponseRedirect('/')
-        else:
-            print("IT IS NOT VALID")
-
-    # if a GET (or any other method) we'll create a blank form
-    else:
-        form = nuevoComentario()
-
-    context = {'form': form}
-    return render(request, 'name.html', context)
-
-
-def museosAcc(req):
-    museos_accesibles = Museo.objects.filter(accesibilidad=True)
-    resp = ""
-    for museo in museos_accesibles:
-        print(museo.nombre)
-        resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a></li>'
-    resp += '<form action="/" ><button type="submit">Página principal</button></form>'
-
-
-    return HttpResponse(resp)
-
-
-def detallesMuseo(request, identificador):
-    try:
-        museo = Museo.objects.get(id=identificador)
-        resp = museo.nombre
-    except ObjectDoesNotExist:
-        resp = "ID inválido"
-
-    comentarios = Comentario.objects.filter(museo__nombre__contains=museo.nombre)
-    if comentarios.count() != 0:
-        resp += comentarios[0].texto
-        print("Comentarios: " + comentarios[0].texto)
-    else:
-        resp += "Museo sin comentarios"
-
-    return HttpResponse(resp)
-    #context = {'form': form, 'detalles_museo': museos, 'comentarios': comentarios}
-    #return render(request, 'barra_museos.html', context)
-
-
-
-
-
-@csrf_exempt
-def museosDistrito(request):
-    if request.method == "GET":
-        form = filtrarDistrito()
-        #distritos = set(Museo.objects.order_by('distrito'))
-        #distritos = Museo.objects..unique().values_list('distrito')
-        distritos = set(Museo.objects.values_list('distrito',flat=True).order_by('distrito'))
-        print(distritos)
-        distritos2 = list(set(Museo.objects.all().values_list('distrito')))
-        print(distritos2)
-        museos = Museo.objects.all()
-        '''
-        resp = ""
-        for museo in museos:
-            #print(museo.nombre)
-            resp += '<li><a href="/museo/' + str(museo.id) + '">' + str(museo.nombre) + '</a></li>'
-
-        '''
-        distrito = "Todos"
-        #context = {'form': form, 'lista_museos': museos, 'distrito': distrito}
-        #return render(request, 'barra_museos.html', context)
-    #return HttpResponse(resp)
-    elif request.method == "POST":
-        #print(form.errors)
-        distrito = request.POST.get('distrito')
-        print("|" + distrito + "|")
-        form = filtrarDistrito()
-        if distrito != "":
-            print("Mi distrito: " + distrito)
-            museos = Museo.objects.filter(distrito=distrito)
-
-            #return HttpResponseRedirect('/thanks/')
-            #context = {'form': form, 'lista_museos': museos_filtrados, 'distrito': distrito}
-            #return render(request, 'barra_museos.html', context)
-        else:
-            museos = Museo.objects.all()
-            distrito = "Todos"
-            #return HttpResponse("Funciona mal!")
-
-    context = {'form': form, 'lista_museos': museos, 'distrito': distrito}
-    return render(request, 'barra_museos.html', context)
-
-
-
-
-@csrf_exempt
-def barra(request):
-    if request.method == "GET":
-        count_mess = Museo.objects.annotate(number_of_comments=Count('comentario')).filter(number_of_comments__gte=1).order_by('-number_of_comments')[:5]
-        #print("LLEGO HASTA AQUI")
-        #aux = number_of_comments.filter()
-        #print("Num comentarios primer : " + str(count_mess[0].number_of_comments))
-        #print(count_mess)
-        resp = "<p><h2>TOP 5 commented museums:</h2></p>"
-        print("Numero museos con comentarios: " + str(count_mess.count()))
-        if count_mess.count() != 0:
-            resp += "<ol>"
-            i = 0
-            for museo in count_mess:
-                print(museo.nombre)
-                resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a>: ' + str(count_mess[i].number_of_comments) + ' comentario(s)</br>'
-                resp += str(museo.claseVial) + " " + str(museo.nombreVia) + ", " + str(museo.numero) + " " + str(museo.codPostal) + " " + str(museo.localidad) + "</br>"
-                resp += "Barrio / Distrito " + str(museo.barrio) + " / " + str(museo.distrito) + "</br>"
-                resp += ' <a href="/museos/' + str(museo.id) + '"> (Más información)</a></li></br>'
-                i = i + 1
-            resp += "</ol>"
-        else:
-            resp += "No comments yet!</br></br>"
-        #resp += '<form method="link" action="/acces/">'
-        #resp += '<input type="button" value="Start"></form>'
-        resp += '<form action="/acces/" ><button type="submit">Museos accesibles</button></form>'
-
-        return HttpResponse(resp)
