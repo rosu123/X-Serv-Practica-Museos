@@ -52,13 +52,55 @@ def xmlParser(req):
 
                 contentURL = museo.find('atributo[@nombre="CONTENT-URL"]').text
                 print (contentURL)
+
+
+
                 localizacion = museo.find('atributo[@nombre="LOCALIZACION"]')
+                try:
+                    nombre_via = localizacion.find('atributo[@nombre="NOMBRE-VIA"]').text
+                    print (nombre_via)
+                except AttributeError:
+                    print ("Campo nombre_via NO encontrado")
+                    pass
+                try:
+                    clase_vial = localizacion.find('atributo[@nombre="CLASE-VIAL"]').text
+                    #clase_vial = "(" + clase_vial + ")"
+                    print (clase_vial)
+                except AttributeError:
+                    print ("Campo clase_vial NO encontrado")
+                    pass
+                try:
+                    numero = localizacion.find('atributo[@nombre="NUM"]').text
+                    #numero = "NUM " + numero
+                    print (numero)
+                except AttributeError:
+                    print ("Campo numero NO encontrado")
+                    pass
+                try:
+                    localidad = localizacion.find('atributo[@nombre="LOCALIDAD"]').text
+                    print (localidad)
+                except AttributeError:
+                    print ("Campo localidad NO encontrado")
+                    pass
+                try:
+                    cod_postal = localizacion.find('atributo[@nombre="CODIGO-POSTAL"]').text
+                    print (cod_postal)
+                except AttributeError:
+                    print ("Campo cod_postal NO encontrado")
+                    pass
+                try:
+                    barrio = localizacion.find('atributo[@nombre="BARRIO"]').text
+                    print (barrio)
+                except AttributeError:
+                    print ("Campo barrio NO encontrado")
+                    pass
                 try:
                     distrito = localizacion.find('atributo[@nombre="DISTRITO"]').text
                     print (distrito)
                 except AttributeError:
                     print ("Campo distrito NO encontrado")
                     pass
+
 
                 datosContacto = museo.find('atributo[@nombre="DATOSCONTACTOS"]')
                 try:
@@ -67,12 +109,6 @@ def xmlParser(req):
                 except AttributeError:
                     print ("Campo telefono NO encontrado")
                     pass
-
-                #numero_comentarios = Comentario.objects.filter(museo__nombre__contains=nombre).count()
-                #print ("Numero comentarios: " + str(numero_comentarios))
-
-
-
                 try:
                     email = datosContacto.find('atributo[@nombre="EMAIL"]').text
                     print (email)
@@ -87,17 +123,16 @@ def xmlParser(req):
 
 
         museo = Museo(idEntidad = idEntidad, nombre = nombre, descripcion = descripcion, horario = horario, transporte = transporte,
-                      accesibilidad = accesibilidad, contentURL = contentURL, distrito = distrito, telefono = telefono,
-                      email = email)
+                      accesibilidad = accesibilidad, contentURL = contentURL, nombreVia = nombre_via, claseVial = clase_vial,
+                      numero = numero, localidad = localidad, codPostal = cod_postal, barrio = barrio, distrito = distrito,
+                      telefono = telefono, email = email)
         print("!!!!!!!!!!!!!!!!!!!!!!!!! Antes de guardar Museo !!!!!!!!!!!!!!!!!!!!!!!!!")
         museo.save()
         print("!!!!!!!!!!!!!!!!!!!!!!!!! Despues de guardar Museo !!!!!!!!!!!!!!!!!!!!!!!!!")
-    #for i in root.iter('contenido'):
-    #    print (i.tag, i.attrib)
 
-    resp = "<a href=/xml>Cargar xml</a>"
-    return HttpResponse(resp)
-    #return HttpResponseRedirect('/')
+    #resp = "<a href=/xml>Cargar xml</a>"
+    #return HttpResponse(resp)
+    return HttpResponseRedirect('/')
 
 
 
@@ -115,7 +150,7 @@ def cargarComentario(request):
             nuevo_comentario.save()
 
 
-            return HttpResponseRedirect('/thanks/')
+            return HttpResponseRedirect('/')
         else:
             print("IT IS NOT VALID")
 
@@ -133,7 +168,7 @@ def museosAcc(req):
     for museo in museos_accesibles:
         print(museo.nombre)
         resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a></li>'
-    resp += '<form action="/" ><button type="submit">Click</button></form>'
+    resp += '<form action="/" ><button type="submit">Página principal</button></form>'
 
 
     return HttpResponse(resp)
@@ -144,10 +179,18 @@ def detallesMuseo(request, identificador):
         museo = Museo.objects.get(id=identificador)
         resp = museo.nombre
     except ObjectDoesNotExist:
-        print ("Campo email NO encontrado")
         resp = "ID inválido"
 
+    comentarios = Comentario.objects.filter(museo__nombre__contains=museo.nombre)
+    if comentarios.count() != 0:
+        resp += comentarios[0].texto
+        print("Comentarios: " + comentarios[0].texto)
+    else:
+        resp += "Museo sin comentarios"
+
     return HttpResponse(resp)
+    #context = {'form': form, 'detalles_museo': museos, 'comentarios': comentarios}
+    #return render(request, 'barra_museos.html', context)
 
 
 
@@ -204,43 +247,25 @@ def barra(request):
         count_mess = Museo.objects.annotate(number_of_comments=Count('comentario')).filter(number_of_comments__gte=1).order_by('-number_of_comments')[:5]
         #print("LLEGO HASTA AQUI")
         #aux = number_of_comments.filter()
-        #print("Num museos con comentarios: " + str(count_mess[0].number_of_comments))
+        #print("Num comentarios primer : " + str(count_mess[0].number_of_comments))
         #print(count_mess)
         resp = "<p><h2>TOP 5 commented museums:</h2></p>"
-        resp += "<ol>"
-        for museo in count_mess:
-            print(museo.nombre)
-            resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a>'
-            resp += ': (' + str(museo.distrito) + ")"
-            resp += ' <a href="/museos/' + str(museo.id) + '"> (Más información)</a></li>'
-        resp += "</ol>"
+        print("Numero museos con comentarios: " + str(count_mess.count()))
+        if count_mess.count() != 0:
+            resp += "<ol>"
+            i = 0
+            for museo in count_mess:
+                print(museo.nombre)
+                resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a>: ' + str(count_mess[i].number_of_comments) + ' comentario(s)</br>'
+                resp += str(museo.claseVial) + " " + str(museo.nombreVia) + ", " + str(museo.numero) + " " + str(museo.codPostal) + " " + str(museo.localidad) + "</br>"
+                resp += "Barrio / Distrito " + str(museo.barrio) + " / " + str(museo.distrito) + "</br>"
+                resp += ' <a href="/museos/' + str(museo.id) + '"> (Más información)</a></li></br>'
+                i = i + 1
+            resp += "</ol>"
+        else:
+            resp += "No comments yet!</br></br>"
         #resp += '<form method="link" action="/acces/">'
         #resp += '<input type="button" value="Start"></form>'
-        resp += '<form action="/acces/" ><button type="submit">Click</button></form>'
+        resp += '<form action="/acces/" ><button type="submit">Museos accesibles</button></form>'
 
         return HttpResponse(resp)
-
-
-
-
-        '''
-        museo = Museo.objects.all()
-        aparcs = aparcs.exclude(num_comentarios=0)
-        aparcs = aparcs.order_by('-num_comentarios')
-        if acc:
-            aparcs = aparcs.exclude(accesibilidad=False)
-        return aparcs[:5]
-
-
-        try:
-            list_urls = Pages.objects.all()
-            resp += "<p>Saved URLs:</p>"
-            resp += "<ol>"
-            #print(resp)
-            for pag in list_urls:
-                resp += '<li><a href="' + str(pag.id) + '">' + pag.name + "  (" + pag.page + ')</a></li>'
-            resp += "</ol>"
-            return HttpResponse(resp)
-        '''
-
-    #return HttpResponseRedirect('/thanks/')
