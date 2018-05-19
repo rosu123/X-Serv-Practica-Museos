@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^$', 'museos.views.barra'),
     url(r'^xml/', 'museos.views.xmlParser'),
     url(r'^comentario/', 'museos.views.cargarComentario'),
-    url(r'^acces/', 'museos.views.museos_acc'),
-    url(r'^museos$', 'museos.views.museos_distrito'),
+    url(r'^acces/', 'museos.views.museosAcc'),
+    url(r'^museos$', 'museos.views.museosDistrito'),
+    url(r'^museos/(\d+)', 'museos.views.detallesMuseo'),
 ]

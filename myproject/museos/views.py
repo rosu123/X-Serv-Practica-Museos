@@ -2,8 +2,11 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 import xml.etree.ElementTree as ET
 from urllib.request import urlopen
+from django.contrib.auth import authenticate, login
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count
+
 from museos.models import Museo
 from museos.models import Comentario
 from museos.models import Seleccion
@@ -124,7 +127,7 @@ def cargarComentario(request):
     return render(request, 'name.html', context)
 
 
-def museos_acc(req):
+def museosAcc(req):
     museos_accesibles = Museo.objects.filter(accesibilidad=True)
     resp = ""
     for museo in museos_accesibles:
@@ -135,8 +138,23 @@ def museos_acc(req):
 
     return HttpResponse(resp)
 
+
+def detallesMuseo(request, identificador):
+    try:
+        museo = Museo.objects.get(id=identificador)
+        resp = museo.nombre
+    except ObjectDoesNotExist:
+        print ("Campo email NO encontrado")
+        resp = "ID inválido"
+
+    return HttpResponse(resp)
+
+
+
+
+
 @csrf_exempt
-def museos_distrito(request):
+def museosDistrito(request):
     if request.method == "GET":
         form = filtrarDistrito()
         #distritos = set(Museo.objects.order_by('distrito'))
@@ -194,7 +212,7 @@ def barra(request):
             print(museo.nombre)
             resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a>'
             resp += ': (' + str(museo.distrito) + ")"
-            resp += ' <a href="/museo/' + str(museo.id) + '"> (Más información)</a></li>'
+            resp += ' <a href="/museos/' + str(museo.id) + '"> (Más información)</a></li>'
         resp += "</ol>"
         #resp += '<form method="link" action="/acces/">'
         #resp += '<input type="button" value="Start"></form>'

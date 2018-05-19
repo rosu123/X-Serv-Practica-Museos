@@ -1,18 +1,18 @@
 
-<div id="primarycontainer">
-   <div class="box">
-      <h2>Filtrar museos por distrito:</h2>
-         <form method="post" action="/museos">
-            {% csrf_token %}
-            <!--{{ form.as_p }}-->
-            <div class="fieldWrapper">
-               {{ form.as_p }}
-            </div>
-            <input type="submit" value="Submit" />
-         </form>
-      <hr />
+   <div id="primarycontainer">
+      <div class="box">
+         <h2>Filtrar museos por distrito:</h2>
+            <form method="post" action="/museos">
+               {% csrf_token %}
+               <!--{{ form.as_p }}-->
+               <div class="fieldWrapper">
+                  {{ form.as_p }}
+               </div>
+               <input type="submit" value="Submit" />
+            </form>
+         <hr />
+      </div>
    </div>
-</div>
 
 
   <div id="secondarycontent">
@@ -21,7 +21,7 @@
     <div id="secondarycontent">
       {% for museo in lista_museos %}
           <h3>{{ museo.nombre }}</h3>
-          <a href="/museo/{{ museo.id }}">
+          <a href="/museos/{{ museo.id }}">
           Pulse aquí para ver su página</a><br />
 
       {% endfor %}
