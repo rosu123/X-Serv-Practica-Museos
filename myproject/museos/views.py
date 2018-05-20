@@ -54,7 +54,7 @@ def cargarComentario(request):
     else:
         resp = ""
         context = {'name': request.user.username,'aut': request.user.is_authenticated(),'respuesta': resp}
-        return render(request, 'name.html', context)
+        return render(request, 'comentarios.html', context)
 
 """
 @csrf_exempt
@@ -66,16 +66,24 @@ def user(request, username):
 
 
 
-def museosAcc(req):
+def museosAcc(request):
     museos_accesibles = Museo.objects.filter(accesibilidad=True)
-    resp = ""
+    resp = "<ol>"
     for museo in museos_accesibles:
         print(museo.nombre)
         resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a></li>'
-    resp += '<form action="/" ><button type="submit">Página principal</button></form>'
+    resp += "</ol>"
 
+    paginas_users = PaginaUser.objects.all()
+    pag = ""
+    for pagina in paginas_users:
+        pag += '<li><a href="/' + str(pagina.user.username) + '">' + str(pagina.titulo) +'</a></li>'
 
-    return HttpResponse(resp)
+    accesibilidad = '<form action="/" ><button type="submit">Página principal</button></form>'
+
+    context = {'name': request.user.username,'aut': request.user.is_authenticated(), 'respuesta': resp, 'paginas_users': pag, 'accesibilidad': accesibilidad}
+    return render(request, 'index.html', context)
+    #return HttpResponse(resp)
 
 
 def detallesMuseo(request, identificador):
@@ -194,7 +202,7 @@ def barra(request):
         #aux = number_of_comments.filter()
         #print("Num comentarios primer : " + str(count_mess[0].number_of_comments))
         #print(count_mess)
-        resp = "<p><h2>TOP 5 commented museums:</h2></p>"
+        resp = "<p><h2>Museos con más comentarios:</h2></p>"
         print("Numero museos con comentarios: " + str(count_mess.count()))
         if count_mess.count() != 0:
             resp += "<ol>"
@@ -213,9 +221,8 @@ def barra(request):
 
         #resp += '<form method="link" action="/acces/">'
         #resp += '<input type="button" value="Start"></form>'
-        resp += '<form action="/acces/" ><button type="submit">Museos accesibles</button></form>'
 
-
+        accesibilidad = '<form action="/acces/" ><button type="submit">Museos accesibles</button></form>'
 
         paginas_users = PaginaUser.objects.all()
         pag = ""
@@ -225,8 +232,8 @@ def barra(request):
 
 
 
-        context = {'name': request.user.username,'aut': request.user.is_authenticated(), 'respuesta': resp, 'paginas_users': pag}
-        return render(request, 'index3.html', context)
+        context = {'name': request.user.username,'aut': request.user.is_authenticated(), 'respuesta': resp, 'paginas_users': pag, 'accesibilidad': accesibilidad}
+        return render(request, 'index.html', context)
         #return HttpResponse(resp)
 
 
