@@ -37,6 +37,14 @@ class Seleccion(models.Model):
     #def __str__(self):
     #    return self.user + "(Museo: " + self.museo.nombre + ")"
 
+class PaginaUser(models.Model):
+    user = models.ForeignKey(User)
+    titulo = models.CharField(max_length=32)
+
+    def __str__(self):
+        return self.user.username + ": " + self.titulo
+
+
 
 class Comentario(models.Model):
     museo = models.ForeignKey(Museo)
@@ -50,7 +58,6 @@ class Comentario(models.Model):
 
 class Configuracion(models.Model):
     user = models.ForeignKey(User)
-    titulo_pag = models.CharField(max_length=64)
     tamano = models.IntegerField()
     letra = models.CharField(max_length=64)
     color = models.CharField(max_length=32)

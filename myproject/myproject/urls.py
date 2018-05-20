@@ -28,5 +28,5 @@ urlpatterns = [
     url(r'^.*login$', 'museos.views.loginView'),
     url(r'^.*logout$', logout, {'next_page': '/'}),
     url(r'^prueba/$', 'museos.views.prueba'),
-
+    #url(r'^(.*)$', 'museos.views.user'),
 ]

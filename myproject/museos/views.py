@@ -12,6 +12,7 @@ from django.db.models import Count
 from museos.models import Museo
 from museos.models import Comentario
 from museos.models import Seleccion
+from museos.models import PaginaUser
 from museos.models import Configuracion
 
 from museos.forms import nuevoComentario
@@ -23,29 +24,46 @@ XML_URL = 'https://datos.madrid.es/portal/site/egob/menuitem.ac61933d6ee3c31cae7
 
 
 def cargarComentario(request):
-    # if this is a POST request we need to process the form data
-    if request.method == 'POST':
-        # create a form instance and populate it with data from the request:
-        form = nuevoComentario(request.POST)
-        # check whether it's valid:
-        if form.is_valid():
-            nuevo_comentario = Comentario()
-            nuevo_comentario.museo = form.cleaned_data['museo']
-            nuevo_comentario.texto = form.cleaned_data['comentario']
-            #print(form.cleaned_data)
-            nuevo_comentario.save()
+    if request.user.is_authenticated():
+        # if this is a POST request we need to process the form data
+        if request.method == 'POST':
+            # create a form instance and populate it with data from the request:
+            form = nuevoComentario(request.POST)
+            # check whether it's valid:
+            if form.is_valid():
+                nuevo_comentario = Comentario()
+                nuevo_comentario.museo = form.cleaned_data['museo']
+                nuevo_comentario.texto = form.cleaned_data['comentario']
+                user = User.objects.get(username=request.user.username)
+                nuevo_comentario.user = user
+                #print(form.cleaned_data)
+                nuevo_comentario.save()
 
 
-            return HttpResponseRedirect('/')
+                return HttpResponseRedirect('/')
+            else:
+                print("IT IS NOT VALID")
+
+        # if a GET (or any other method) we'll create a blank form
         else:
-            print("IT IS NOT VALID")
+            form = nuevoComentario()
 
-    # if a GET (or any other method) we'll create a blank form
+        context = {'name': request.user.username,'aut': request.user.is_authenticated(),'form': form}
+        return render(request, 'name.html', context)
+
     else:
-        form = nuevoComentario()
+        resp = ""
+        context = {'name': request.user.username,'aut': request.user.is_authenticated(),'respuesta': resp}
+        return render(request, 'name.html', context)
 
-    context = {'form': form}
-    return render(request, 'name.html', context)
+"""
+@csrf_exempt
+def user(request, username):
+"""
+
+
+
+
 
 
 def museosAcc(req):
@@ -90,7 +108,7 @@ def about(request):
 
 def prueba(request):
     context = {'name': request.user.username,'aut': request.user.is_authenticated()}
-    return render(request, 'index3.html', context)
+    return render(request, 'index.html', context)
 
 
 @csrf_exempt
@@ -143,6 +161,24 @@ def loginView(request):
     user = authenticate(username=username, password=password)
     if user is not None:
         login(request, user)
+
+        try:
+            pagina_usuario = PaginaUser.objects.get(user=user)
+        #print(pagina_usuario.titulo)
+        #print(PaginaUser.objects.get(user=username))
+        except ObjectDoesNotExist:
+            titulo = "Pagina de " + username
+            pagina_usuario = PaginaUser(user = user, titulo = titulo)
+            pagina_usuario.save()
+
+        """
+
+        if PaginaUser.objects.get(user=username):
+            print("EXISTE")
+
+        else:
+            print("NO EXISTE")
+        """
         return HttpResponseRedirect('/')
     else:
         return HttpResponseRedirect('/')
@@ -174,14 +210,22 @@ def barra(request):
 
         else:
             resp += "No comments yet!</br></br>"
+
         #resp += '<form method="link" action="/acces/">'
         #resp += '<input type="button" value="Start"></form>'
         resp += '<form action="/acces/" ><button type="submit">Museos accesibles</button></form>'
 
 
 
+        paginas_users = PaginaUser.objects.all()
+        pag = ""
+        for pagina in paginas_users:
+            pag += '<li><a href="/' + str(pagina.user.username) + '">' + str(pagina.titulo) +'</a></li>'
 
-        context = {'name': request.user.username,'aut': request.user.is_authenticated(), 'respuesta': resp}
+
+
+
+        context = {'name': request.user.username,'aut': request.user.is_authenticated(), 'respuesta': resp, 'paginas_users': pag}
         return render(request, 'index3.html', context)
         #return HttpResponse(resp)
 
