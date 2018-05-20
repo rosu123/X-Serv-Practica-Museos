@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -31,7 +32,7 @@ class Museo(models.Model):
 
 class Seleccion(models.Model):
     museo = models.ForeignKey(Museo)
-    user = models.CharField(max_length=32)
+    user = models.ForeignKey(User)
 
     #def __str__(self):
     #    return self.user + "(Museo: " + self.museo.nombre + ")"
@@ -39,6 +40,7 @@ class Seleccion(models.Model):
 
 class Comentario(models.Model):
     museo = models.ForeignKey(Museo)
+    user = models.ForeignKey(User)
     texto = models.TextField()
     fecha = models.DateTimeField(auto_now=True)
 
@@ -47,7 +49,7 @@ class Comentario(models.Model):
 
 
 class Configuracion(models.Model):
-    user = models.CharField(max_length=32)
+    user = models.ForeignKey(User)
     titulo_pag = models.CharField(max_length=64)
     tamano = models.IntegerField()
     letra = models.CharField(max_length=64)

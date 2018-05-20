@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+    <header>
+		 <div id="user_login">
+		 		  {% if aut %}
+		 				<h3> Bienvenido {{ name }}</h3>
+		 				<a class="boton" href="logout">Logout</a>
+		 		  {% else %}
+		 				<form method="post" action="login">
+		 					 <input class="textbox" type="text" name="username" placeholder="Username">
+		 					 <input class="textbox" type="password" name="password" placeholder="Contraseña">
+		 					 <input class="boton" type="submit" value="Login">
+		 				</form>
+		 		  {% endif %}
+		 </div>
+    </header>
+	 <div id="content">
+        {{ respuesta|safe }}
+	 </div>
+
+</body>
+</html>

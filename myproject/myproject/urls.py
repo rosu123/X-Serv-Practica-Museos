@@ -13,6 +13,7 @@ Including another URLconf
     1. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import include, url
+from django.contrib.auth.views import logout
 from django.contrib import admin
 
 urlpatterns = [
@@ -24,4 +25,8 @@ urlpatterns = [
     url(r'^museos/$', 'museos.views.museosDistrito'),
     url(r'^museos/(\d+)', 'museos.views.detallesMuseo'),
     url(r'^about/$', 'museos.views.about'),
+    url(r'^.*login$', 'museos.views.loginView'),
+    url(r'^.*logout$', logout, {'next_page': '/'}),
+    url(r'^prueba/$', 'museos.views.prueba'),
+
 ]

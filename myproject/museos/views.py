@@ -2,9 +2,11 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 import xml.etree.ElementTree as ET
 from urllib.request import urlopen
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
+from sqlite3 import OperationalError
 from django.db.models import Count
 
 from museos.models import Museo
@@ -86,7 +88,9 @@ def about(request):
     return render(request, 'about.html', context)
 
 
-
+def prueba(request):
+    context = {'name': request.user.username,'aut': request.user.is_authenticated()}
+    return render(request, 'index3.html', context)
 
 
 @csrf_exempt
@@ -132,6 +136,18 @@ def museosDistrito(request):
     return render(request, 'barra_museos.html', context)
 
 
+@csrf_exempt
+def loginView(request):
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(username=username, password=password)
+    if user is not None:
+        login(request, user)
+        return HttpResponseRedirect('/')
+    else:
+        return HttpResponseRedirect('/')
+
+
 
 
 @csrf_exempt
@@ -155,13 +171,19 @@ def barra(request):
                 resp += ' <a href="/museos/' + str(museo.id) + '"> (Más información)</a></li></br>'
                 i = i + 1
             resp += "</ol>"
+
         else:
             resp += "No comments yet!</br></br>"
         #resp += '<form method="link" action="/acces/">'
         #resp += '<input type="button" value="Start"></form>'
         resp += '<form action="/acces/" ><button type="submit">Museos accesibles</button></form>'
 
-        return HttpResponse(resp)
+
+
+
+        context = {'name': request.user.username,'aut': request.user.is_authenticated(), 'respuesta': resp}
+        return render(request, 'index3.html', context)
+        #return HttpResponse(resp)
 
 
 def xmlParser(req):
