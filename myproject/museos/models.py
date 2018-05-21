@@ -62,3 +62,6 @@ class Configuracion(models.Model):
     tamano = models.IntegerField()
     #letra = models.CharField(max_length=64)
     color = models.CharField(max_length=32)
+
+    def __str__(self):
+        return self.user.username + ": " + str(self.tamano) + "px / " + self.color

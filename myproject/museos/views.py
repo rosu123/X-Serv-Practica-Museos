@@ -21,7 +21,8 @@ from museos.forms import filtrarDistrito
 
 # Create your views here.
 XML_URL = 'https://datos.madrid.es/portal/site/egob/menuitem.ac61933d6ee3c31cae77ae7784f1a5a0/?vgnextoid=00149033f2201410VgnVCM100000171f5a0aRCRD&format=xml&file=0&filename=201132-0-museos&mgmtid=118f2fdbecc63410VgnVCM1000000b205a0aRCRD&preview=full'
-
+TAMANO_CSS_DEFAULT = '14px'
+COLOR_CSS_DEFAULT = '#FFFFFF'
 
 
 def insertar_atributo_xml(child, atributo, valor):
@@ -53,15 +54,16 @@ def xmlUser(request, username):
 def css(request):
     #template = get_template("style.css")
     username = request.user.get_username()
+    print("LLAMO A CSS")
     try:
-        conf_usuario = PagUsuario.objects.get(user__username=username)
-        color = pag_usuario.color_css
-        tam = pag_usuario.tamano_css
+        conf_user = Configuracion.objects.get(user__username=username)
+        color = conf_user.color
+        tamano = conf_user.tamano
     except ObjectDoesNotExist:
         color = COLOR_CSS_DEFAULT
-        tam = TAMANO_CSS_DEFAULT
-    context = Context({'tam': str(tam), 'color': color})
-    return HttpResponse(template.render(context), content_type="text/css")
+        tamano = TAMANO_CSS_DEFAULT
+    context = {'tam': str(tamano), 'color': color}
+    return HttpResponse(render(request, 'style.css', context), content_type="text/css")
 
 
 def actualizarDatos(request,username):
@@ -78,8 +80,13 @@ def actualizarEstilo(request,username):
     tamano_css = request.POST.get('tamano_css')
     if color_css and tamano_css:
         print("Nuevos tamaño y color en CSS")
-        conf_usuario = Configuracion(usuario=user, tamano_css=tamano_css, color_css=color_css)
-        conf_usuario.save()
+        try:
+            conf_user = Configuracion.objects.get(user__username=username)
+            Configuracion.objects.filter(user__username=username).update(tamano=tamano_css, color=color_css)
+
+        except ObjectDoesNotExist:
+            conf_usuario = Configuracion(user=username, tamano=tamano_css, color=color_css)
+            conf_usuario.save()
     else:
         print("No se actualiza CSS")
 
@@ -112,7 +119,7 @@ def user(request, username):
 
     if request.method == "POST" and request.user.is_authenticated():
         actualizarDatos(request,username)
-        actualizarEstilo(request,username)
+        actualizarEstilo(request,user)
 
     titulo = PaginaUser.objects.get(user__username=username)
 
