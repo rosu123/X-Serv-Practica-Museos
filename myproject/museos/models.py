@@ -33,9 +33,10 @@ class Museo(models.Model):
 class Seleccion(models.Model):
     museo = models.ForeignKey(Museo)
     user = models.ForeignKey(User)
+    fecha = models.DateTimeField(auto_now=True, blank=True, null=True)
 
-    #def __str__(self):
-    #    return self.user + "(Museo: " + self.museo.nombre + ")"
+    def __str__(self):
+        return self.user.username + ": " + self.museo.nombre + " " + str(self.fecha)
 
 class PaginaUser(models.Model):
     user = models.ForeignKey(User)

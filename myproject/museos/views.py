@@ -23,6 +23,69 @@ from museos.forms import filtrarDistrito
 XML_URL = 'https://datos.madrid.es/portal/site/egob/menuitem.ac61933d6ee3c31cae77ae7784f1a5a0/?vgnextoid=00149033f2201410VgnVCM100000171f5a0aRCRD&format=xml&file=0&filename=201132-0-museos&mgmtid=118f2fdbecc63410VgnVCM1000000b205a0aRCRD&preview=full'
 
 
+
+
+@csrf_exempt
+def user(request, username):
+    #user = User.objects.get(username=request.user.username)
+    #global acc
+    selec = Seleccion.objects.filter(user__username=username)
+    try:
+        user = User.objects.get(username=username)
+        found = True
+    except ObjectDoesNotExist:
+        found = False
+
+    #if acc:
+    #    selec = selec.exclude(museo__accesibilidad=False)
+    ultima = False
+    try:
+        pag = int(request.GET['pag'])
+        if pag <= 0:
+            pag = 1
+    except KeyError:
+        pag = 1
+    inicio = (pag - 1) * 5
+    fin = pag * 5
+    if fin >= len(selec):
+        fin = len(selec)
+        ultima = True
+
+    my_page = request.user.is_authenticated() and (username == request.user.username)
+
+    context = {'aut': request.user.is_authenticated(), 'name': request.user.username, 'found': found,
+                'selecciones': selec[inicio:fin], 'ultima': ultima, 'primera': (pag == 1),
+                'pag_sig': str(pag + 1), 'pag_ant': str(pag - 1), 'username': username}
+    return render(request, 'users.html', context)
+
+
+
+
+
+
+
+def museosAcc(request):
+    museos_accesibles = Museo.objects.filter(accesibilidad=True)
+    #resp = "<ol>"
+    #for museo in museos_accesibles:
+    #    print(museo.nombre)
+    #    resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a></li>'
+    #resp += "</ol>"
+
+    paginas_users = PaginaUser.objects.all()
+    #pag = ""
+    #for pagina in paginas_users:
+    #    pag += '<li><a href="/' + str(pagina.user.username) + '">' + str(pagina.titulo) +'</a></li>'
+
+    #accesibilidad = '<form action="/" ><button type="submit">Página principal</button></form>'
+
+    context = {'name': request.user.username,'aut': request.user.is_authenticated(),
+                'museos_accesibles': museos_accesibles, 'paginas_users': paginas_users}
+    return render(request, 'accesibilidad.html', context)
+    #return HttpResponse(resp)
+
+
+
 def cargarComentario(request):
     if request.user.is_authenticated():
         # if this is a POST request we need to process the form data
@@ -49,62 +112,111 @@ def cargarComentario(request):
             form = nuevoComentario()
 
         context = {'name': request.user.username,'aut': request.user.is_authenticated(),'form': form}
-        return render(request, 'name.html', context)
+        return render(request, 'comentarios.html', context)
 
     else:
         resp = ""
         context = {'name': request.user.username,'aut': request.user.is_authenticated(),'respuesta': resp}
         return render(request, 'comentarios.html', context)
 
-"""
-@csrf_exempt
-def user(request, username):
-"""
 
-
-
-
-
-
-def museosAcc(request):
-    museos_accesibles = Museo.objects.filter(accesibilidad=True)
-    resp = "<ol>"
-    for museo in museos_accesibles:
-        print(museo.nombre)
-        resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a></li>'
-    resp += "</ol>"
-
-    paginas_users = PaginaUser.objects.all()
-    pag = ""
-    for pagina in paginas_users:
-        pag += '<li><a href="/' + str(pagina.user.username) + '">' + str(pagina.titulo) +'</a></li>'
-
-    accesibilidad = '<form action="/" ><button type="submit">Página principal</button></form>'
-
-    context = {'name': request.user.username,'aut': request.user.is_authenticated(), 'respuesta': resp, 'paginas_users': pag, 'accesibilidad': accesibilidad}
-    return render(request, 'index.html', context)
-    #return HttpResponse(resp)
 
 
 def detallesMuseo(request, identificador):
     try:
         museo = Museo.objects.get(id=identificador)
-        resp = museo.nombre
+        #resp = museo.nombre
     except ObjectDoesNotExist:
-        resp = "ID inválido"
-        return HttpResponse(resp)
+        #resp = "ID inválido"
+        context = {'name': request.user.username,'aut': request.user.is_authenticated()}
+        return render(request, 'error.html', context)
 
     comentarios = Comentario.objects.filter(museo__nombre__contains=museo.nombre)
-    if comentarios.count() != 0:
-        resp += comentarios[0].texto
-        print("Comentarios: " + comentarios[0].texto)
+    #if comentarios.count() != 0:
+    #    resp += comentarios[0].texto
+    #    print("Comentarios: " + comentarios[0].texto)
+    #else:
+    #    resp += "Museo sin comentarios, ¡se el primero en comentar!"
+
+
+
+    if request.user.is_authenticated():
+        # if this is a POST request we need to process the form data
+        if request.method == 'POST':
+            # create a form instance and populate it with data from the request:
+            form = nuevoComentario(request.POST)
+            # check whether it's valid:
+            if form.is_valid():
+                nuevo_comentario = Comentario()
+                nuevo_comentario.museo = museo
+                nuevo_comentario.texto = form.cleaned_data['comentario']
+                user = User.objects.get(username=request.user.username)
+                nuevo_comentario.user = user
+                #print(form.cleaned_data)
+                nuevo_comentario.save()
+
+
+                form = nuevoComentario()
+            else:
+                print("IT IS NOT VALID")
+
+        # if a GET (or any other method) we'll create a blank form
+        else:
+            form = nuevoComentario()
+
+        seleccion = Seleccion.objects.filter(user__username__contains=request.user.username).filter(museo__nombre__contains=museo.nombre)
+        #museo = Seleccion.objects.get(museo=museo)
+        seleccionado = True
+        if seleccion.count() == 0:
+            print("ESTA VACIO")
+            seleccionado = False
+            #nueva_seleccion = Seleccion()
+            #nueva_seleccion.museo = museo
+            #user = User.objects.get(username=request.user.username)
+            #nueva_seleccion.user = user
+            #nueva_seleccion.save()
+        else:
+            print("SI ESTA SELECCIONADO")
+
+
+        #context = {'name': request.user.username,'aut': request.user.is_authenticated(),'form': form}
+        #return render(request, 'comentarios.html', context)
     else:
-        resp += "Museo sin comentarios"
+        form = None
+        seleccionado = False
 
 
-    #return HttpResponse(resp)
-    context = {'museo': museo, 'comentarios': comentarios}
+    context = {'name': request.user.username,'aut': request.user.is_authenticated(),'museo': museo,
+                'comentarios': comentarios, 'form': form, 'id': identificador, 'seleccionado': seleccionado}
     return render(request, 'detalles_museo.html', context)
+
+@csrf_exempt
+def gestionSeleccion(request, identificador):
+
+    museo = Museo.objects.get(id=identificador)
+    seleccion = Seleccion.objects.filter(user__username__contains=request.user.username).filter(museo__nombre__contains=museo.nombre)
+    if seleccion.count() < 1:
+        nueva_seleccion = Seleccion()
+        nueva_seleccion.museo = museo
+        user = User.objects.get(username=request.user.username)
+        nueva_seleccion.user = user
+        nueva_seleccion.save()
+    print("Seleccion")
+    return detallesMuseo(request, identificador)
+
+    #return HttpResponse("Hola caracola")
+
+@csrf_exempt
+def gestionDeseleccion(request, identificador):
+
+    museo = Museo.objects.get(id=identificador)
+    seleccion = Seleccion.objects.filter(user__username__contains=request.user.username).filter(museo__nombre__contains=museo.nombre)
+    seleccion.delete()
+    print("Deseleccion")
+    return detallesMuseo(request, identificador)
+    #return HttpResponse("Hola caracola")
+
+
 
 
 def about(request):
@@ -126,9 +238,9 @@ def museosDistrito(request):
         #distritos = set(Museo.objects.order_by('distrito'))
         #distritos = Museo.objects..unique().values_list('distrito')
         distritos = set(Museo.objects.values_list('distrito',flat=True).order_by('distrito'))
-        print(distritos)
+        #print(distritos)
         distritos2 = list(set(Museo.objects.all().values_list('distrito')))
-        print(distritos2)
+        #print(distritos2)
         museos = Museo.objects.all()
         '''
         resp = ""
@@ -158,7 +270,8 @@ def museosDistrito(request):
             distrito = "Todos"
             #return HttpResponse("Funciona mal!")
 
-    context = {'form': form, 'lista_museos': museos, 'distrito': distrito}
+    context = {'name': request.user.username,'aut': request.user.is_authenticated(),
+                'form': form, 'lista_museos': museos, 'distrito': distrito}
     return render(request, 'barra_museos.html', context)
 
 
@@ -202,17 +315,17 @@ def barra(request):
         #aux = number_of_comments.filter()
         #print("Num comentarios primer : " + str(count_mess[0].number_of_comments))
         #print(count_mess)
-        resp = "<p><h2>Museos con más comentarios:</h2></p>"
+        #resp = "<p><h2>Museos con más comentarios:</h2></p>"
         print("Numero museos con comentarios: " + str(count_mess.count()))
         if count_mess.count() != 0:
-            resp += "<ol>"
+            resp = "<ol>"
             i = 0
             for museo in count_mess:
                 print(museo.nombre)
                 resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a>: ' + str(Comentario.objects.filter(museo__nombre__contains=museo.nombre).count()) + ' comentario(s)</br>'
                 resp += str(museo.claseVial) + " " + str(museo.nombreVia) + ", " + str(museo.numero) + " " + str(museo.codPostal) + " " + str(museo.localidad) + "</br>"
                 resp += "Barrio / Distrito " + str(museo.barrio) + " / " + str(museo.distrito) + "</br>"
-                resp += ' <a href="/museos/' + str(museo.id) + '"> (Más información)</a></li></br>'
+                resp += ' <a href="/museos/' + str(museo.id) + '"> (Más información)</a></li></br><hr>'
                 i = i + 1
             resp += "</ol>"
 
@@ -222,18 +335,18 @@ def barra(request):
         #resp += '<form method="link" action="/acces/">'
         #resp += '<input type="button" value="Start"></form>'
 
-        accesibilidad = '<form action="/acces/" ><button type="submit">Museos accesibles</button></form>'
+        #accesibilidad = '<form action="/acces/" ><button type="submit">Museos accesibles</button></form>'
 
         paginas_users = PaginaUser.objects.all()
-        pag = ""
-        for pagina in paginas_users:
-            pag += '<li><a href="/' + str(pagina.user.username) + '">' + str(pagina.titulo) +'</a></li>'
+        #pag = ""
+        #for pagina in paginas_users:
+        #    pag += '<li><a href="/' + str(pagina.user.username) + '">' + str(pagina.titulo) +'</a></li>'
 
 
 
 
-        context = {'name': request.user.username,'aut': request.user.is_authenticated(), 'respuesta': resp, 'paginas_users': pag, 'accesibilidad': accesibilidad}
-        return render(request, 'index.html', context)
+        context = {'name': request.user.username,'aut': request.user.is_authenticated(), 'respuesta': resp, 'paginas_users': paginas_users}
+        return render(request, 'barra.html', context)
         #return HttpResponse(resp)
 
 

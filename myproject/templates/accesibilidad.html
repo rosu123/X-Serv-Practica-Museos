@@ -3,21 +3,25 @@
 
    {% block contenido %}
 	<div id="primarycontainer">
-	     <center><p><h1>Museos con más comentarios:</h1></p></center></br>
-        {{ respuesta|safe }}
+	     <p><h2>Museos accesibles:</h2></p></br>
+		  <ol>
+		  {% for museo in museos_accesibles %}
+        		<li><a href="{{ museo.contentURL }}">{{ museo.nombre }}</a></li>
+		  {% endfor %}
+		  </ol>
 	</div>
    {% endblock %}
 
 
    {% block columnaderecha %}
 	<div id="secondarycontent">
-	     <form action="/acces/"><button type="submit">Museos accesibles</button></form>
+	     <form action="/" ><button type="submit">Página principal</button></form>
 	</div>
    {% endblock %}
 
    {% block columnaizquierda %}
    <div id="secondarycontent">
-         <p><h3>Lista de usuarios:</h3></p>
+			<p><h3>Lista de usuarios:</h3></p>
          {% for pagina in paginas_users %}
             <li><a href="/{{ pagina.user.username }}">{{ pagina.titulo }}</a></li>
          {% endfor %}

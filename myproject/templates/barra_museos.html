@@ -1,6 +1,7 @@
+{% extends "index.html" %}
 
-   
 
+   {% block seleccionador %}
    <div id="primarycontainer">
       <div class="box">
          <h2>Filtrar museos por distrito:</h2>
@@ -15,17 +16,19 @@
          <hr />
       </div>
    </div>
+   {% endblock %}
 
-
+  {% block contenido %}
   <div id="secondarycontent">
-    <br/><h2><center><em><u>Museos seleccionados: {{ distrito }} </u></em></center></h2><br/>
+    <center><p><h1>Museos seleccionados: {{ distrito }}</h1></p></center></br>
     <br/><br/>
     <div id="secondarycontent">
       {% for museo in lista_museos %}
           <h3>{{ museo.nombre }}</h3>
           <a href="/museos/{{ museo.id }}">
-          Pulse aquí para ver su página</a><br />
+          Pulse aquí para ver su página</a><br /><hr>
 
       {% endfor %}
     </div>
   </div>
+  {% endblock %}

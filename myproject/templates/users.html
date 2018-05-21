@@ -1,0 +1,30 @@
+{% extends "index.html" %}
+
+{% block contenido %}
+{% if found %}
+        <section {% if not my_page %}class="all_page"{%endif%}>
+            <h1>Selección de {{ username }}</h1><br/>
+
+            {% for s in selecciones %}
+                <a href="{{ s.museo.contentURL }}">{{ s.museo.nombre }}</a></br>
+                <p>{{ s.museo.claseVial }} {{ s.museo.nombreVia }}, {{ s.museo.numero }} {{ s.museo.codPostal }} {{ s.museo.localidad }}</p>
+                <p>Barrio / Distrito {{ s.museo.barrio }} / {{ s.museo.distrito }}</p>
+                <a href="museos/{{ s.museo.id }}">(Mas información)</a></br>
+                <p>Fecha de selección: {{ s.fecha }}</p>
+                <hr>
+            {% endfor %}
+            <div id="cambio_pagina">
+                {% if not primera %}
+                    <a class="boton" id="anterior" href="{{ username }}?pag={{ pag_ant }}">Página anterior</a>
+                {% endif %}
+                {% if not ultima %}
+                    <a class="boton" id="siguiente" href="{{ username }}?pag={{ pag_sig }}">Página siguiente</a>
+                {% endif %}
+            </div>
+        </section>
+    {% else %}
+        <section class="all_page">
+            <h1>El usuario {{ username }} no existe</h1>
+        </section>
+    {% endif %}
+{% endblock %}

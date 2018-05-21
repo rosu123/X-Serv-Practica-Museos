@@ -1,6 +1,9 @@
+{% extends "index.html" %}
+
+{% block contenido %}
 <div id="primarycontainer">
 	<div class="box">
-		<h2><em><u>{{ museo.nombre }}</u></em></h2></br>
+		<h2><em><b>{{ museo.nombre }}</b></em></h2></br>
 			<p><b><u>Descripción:</u></b> {{ museo.descripcion|default:"no especificado"  }}</p>
 			<p><b><u>Horario:</u></b> {{ museo.horario|default:"no especificado"  }}</p>
 			<p><b><u>Transporte:</u></b> {{ museo.transporte|default:"no especificado"  }}</p>
@@ -16,10 +19,47 @@
 			<p><b><u>Contacto:</u></b> {{ museo.telefono|default:"no especificado"  }} / {{ museo.email|default:"no especificado"  }}</p>
 			<p><b><u>Comentarios:</u></b></p>
 			<ul style="list-style-type:square">
-			{% for comentario in comentarios %}
-				 <li>{{ comentario.texto }}<br /></li>
-			{% endfor %}
+			{% if comentarios.count != 0 %}
+				{% for comentario in comentarios %}
+					 <li><b>{{ comentario.user.username }}</b>: {{ comentario.texto }}<br /><br /></li>
+				{% endfor %}
+			{% else %}
+				<h4>Museo sin comentarios, ¡se el primero en hacerlo!<br /></h4>
+			{% endif %}
+
+			{% if aut %}
+			<form action="/museos/{{ id }}" method="post">
+				 {% csrf_token %}
+				 <!--{{ form.as_p }}-->
+				 {% for field in form %}
+					 <div class="fieldWrapper">
+						  {{ field.errors }}
+						  {{ field.label_tag }} {{ field }}
+						  {% if field.help_text %}
+						  <p class="help">{{ field.help_text|safe }}</p>
+						  {% endif %}
+					 </div>
+				 {% endfor %}
+				 <input type="submit" value="Submit" />
+			</form>
+			{% endif %}
 		</ul>
 		<hr />
 	</div>
 </div>
+{% endblock %}
+
+
+{% block columnaderecha %}
+{% if aut %}
+	{% if seleccionado %}
+		<div id="secondarycontent">
+			  <form action="/deseleccion/{{ id }}" method="post"><button type="submit">Deseleccionar</button></form>
+		</div>
+	{% else %}
+		<div id="secondarycontent">
+			  <form action="/seleccion/{{ id }}" method="post"><button type="submit">Seleccionar</button></form>
+		</div>
+	{% endif %}
+{% endif %}
+{% endblock %}
