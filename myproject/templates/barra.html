@@ -17,9 +17,9 @@
 
    {% block columnaizquierda %}
    <div id="secondarycontent">
-         <p><h3>Lista de usuarios:</h3></p>
+         <p><h3>Lista de páginas personales:</h3></p>
          {% for pagina in paginas_users %}
-            <li><a href="/{{ pagina.user.username }}">{{ pagina.titulo }}</a></li>
+            <li><a href="/{{ pagina.user.username }}">{{ pagina.titulo }} ({{ pagina.user.username }})</a></li>
          {% endfor %}
    </div>
    {% endblock %}

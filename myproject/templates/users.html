@@ -7,7 +7,7 @@
 {% block contenido %}
 {% if found %}
         <section {% if not userpropio %}class="all_page"{%endif%}>
-            <h1>{{ titulo.titulo }} (selección de {{ username }})</h1><br/>
+            <h1>{{ titulo.titulo }} ({{ username }})</h1><br/>
 
             {% for s in selecciones %}
                 <a href="{{ s.museo.contentURL }}">{{ s.museo.nombre }}</a></br>

@@ -4,45 +4,14 @@
   <title>Museos de Madrid</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   {% load static %}
+  <link rel="icon" type="image/x-icon" href="{% static "img/favicon.ico" %}">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
   <link href="style.css" rel="stylesheet" type="text/css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <!--<style>
-    /* Remove the navbar's default margin-bottom and rounded borders */
-    .navbar {
-      margin-bottom: 0;
-      border-radius: 0;
-    }
 
-    /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
-    .row.content {height: 450px}
-
-    /* Set gray background color and 100% height */
-    .sidenav {
-      padding-top: 20px;
-      background-color: #f1f1f1;
-      height: 100%;
-    }
-
-    /* Set black background color, white text and some padding */
-    footer {
-      background-color: #555;
-      color: white;
-      padding: 15px;
-    }
-
-    /* On small screens, set height to 'auto' for sidenav and grid */
-    @media screen and (max-width: 767px) {
-      .sidenav {
-        height: auto;
-        padding: 15px;
-      }
-      .row.content {height:auto;}
-    }
-  </style>-->
 </head>
 <body>
 
@@ -57,14 +26,13 @@
       </button>
       <a class="navbar-brand" style="font-weight: 800;font-size:40px;padding:35px 15px" href="/">Museos de Madrid</a>
     </div>
-    <div class="collapse navbar-collapse" id="myNavbar">
+    <div id="myNavbar" class="collapse navbar-collapse">
       <ul class="nav navbar-nav" style="min-height:75px;margin-top:20px;">
 
         <li  class="" style="font-size:20px;margin-bottom:-10px"><a href="/museos">Todos</a></li>
         <li style="font-size:20px"><a href="/about/">About</a></li>
         {% block opcioninicio %}{% endblock %}
         <!--<li style="font-size:20px"><a href="#">Projects</a></li>-->
-        <!--<li style="font-size:20px"><a href="#">Contact</a></li>-->
       </ul>
       {% if aut %}
          <ul class="nav navbar-nav navbar-right" style="margin-top:20px">
@@ -114,31 +82,24 @@
     </div>
     <div id="errormsg"class="col-sm-8 text-left">
       {% block errorMsg %}{% endblock %}
-      <!--<h1>Welcome</h1>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-      -->
       {% block seleccionador %}{% endblock %}
       <div id="content">
          {% block contenido %}{% endblock %}
       </div>
       <hr>
-      <!--<h3>Test</h3>
-      <p>Lorem ipsum...</p>-->
     </div>
     <div id="columnderch" class="col-sm-2 sidenav">
       <div class="well">
         <p>{% block columnaderecha %}{% endblock %}</p>
       </div>
-      <!--<div class="well">
-        <p>ADS</p>
-      </div>-->
     </div>
   </div>
 </div>
 
-<footer class="container-fluid text-center">
+<footer id="footer" class="container-fluid text-center">
   <p>Esta aplicación utiliza datos del portal de datos abiertos de la ciudad de Madrid</p>
-  <a style="color: #999" href="https://datos.madrid.es/portal/site/egob/menuitem.c05c1f754a33a9fbe4b2e4b284f1a5a0/?vgnextoid=118f2fdbecc63410VgnVCM1000000b205a0aRCRD&vgnextchannel=374512b9ace9f310VgnVCM100000171f5a0aRCRD&vgnextfmt=default/">Museos de Madrid</a>
+  <a style="color: #999;" href="https://datos.madrid.es/portal/site/egob/menuitem.c05c1f754a33a9fbe4b2e4b284f1a5a0/?vgnextoid=118f2fdbecc63410VgnVCM1000000b205a0aRCRD&vgnextchannel=374512b9ace9f310VgnVCM100000171f5a0aRCRD&vgnextfmt=default/">Museos de Madrid</a>
+  <a style="color: #999;" href="https://datos.madrid.es/portal/site/egob/menuitem.ac61933d6ee3c31cae77ae7784f1a5a0/?vgnextoid=00149033f2201410VgnVCM100000171f5a0aRCRD&format=xml&file=0&filename=201132-0-museos&mgmtid=118f2fdbecc63410VgnVCM1000000b205a0aRCRD&preview=full">XML</a>
 </footer>
 
 </body>

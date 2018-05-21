@@ -52,9 +52,8 @@ def xmlUser(request, username):
 
 
 def css(request):
-    #template = get_template("style.css")
     username = request.user.get_username()
-    print("LLAMO A CSS")
+    #print("LLAMO A CSS")
     try:
         conf_user = Configuracion.objects.get(user__username=username)
         color = conf_user.color
@@ -68,18 +67,18 @@ def css(request):
 
 def actualizarDatos(request,username):
     titulo = request.POST.get('titulo', False)
-    print("Titulo: " + str(titulo))
+    #print("Titulo: " + str(titulo))
     if titulo:
         PaginaUser.objects.filter(user__username=username).update(titulo=titulo)
-    else:
-        print("Titulo vacio")
+    #else:
+    #    print("Titulo vacio")
 
 
 def actualizarEstilo(request,username):
     color_css = request.POST.get('color_css')
     tamano_css = request.POST.get('tamano_css')
     if color_css and tamano_css:
-        print("Nuevos tamaño y color en CSS")
+        #print("Nuevos tamaño y color en CSS")
         try:
             conf_user = Configuracion.objects.get(user__username=username)
             Configuracion.objects.filter(user__username=username).update(tamano=tamano_css, color=color_css)
@@ -87,23 +86,19 @@ def actualizarEstilo(request,username):
         except ObjectDoesNotExist:
             conf_usuario = Configuracion(user=username, tamano=tamano_css, color=color_css)
             conf_usuario.save()
-    else:
-        print("No se actualiza CSS")
+    #else:
+    #    print("No se actualiza CSS")
 
 
+#Función realizada con ayuda de compañeros de clase
 @csrf_exempt
 def user(request, username):
-    #user = User.objects.get(username=request.user.username)
-    #global acc
     selec = Seleccion.objects.filter(user__username=username)
     try:
         user = User.objects.get(username=username)
         found = True
     except ObjectDoesNotExist:
         found = False
-
-    #if acc:
-    #    selec = selec.exclude(museo__accesibilidad=False)
     ultima = False
     try:
         pag = int(request.GET['pag'])
@@ -125,7 +120,7 @@ def user(request, username):
 
     userpropio = request.user.is_authenticated() and (username == request.user.username)
 
-    print("¿SOY EL DUEÑO?: " + str(userpropio))
+    #print("¿SOY EL DUEÑO?: " + str(userpropio))
     context = {'aut': request.user.is_authenticated(), 'name': request.user.username, 'found': found,
                 'selecciones': selec[inicio:fin], 'ultima': ultima, 'primera': (pag == 1),
                 'pag_sig': str(pag + 1), 'pag_ant': str(pag - 1), 'username': username,
@@ -134,29 +129,12 @@ def user(request, username):
 
 
 
-
-
-
-
 def museosAcc(request):
     museos_accesibles = Museo.objects.filter(accesibilidad=True)
-    #resp = "<ol>"
-    #for museo in museos_accesibles:
-    #    print(museo.nombre)
-    #    resp += '<li><a href="' + str(museo.contentURL) + '">' + str(museo.nombre) +'</a></li>'
-    #resp += "</ol>"
-
     paginas_users = PaginaUser.objects.all()
-    #pag = ""
-    #for pagina in paginas_users:
-    #    pag += '<li><a href="/' + str(pagina.user.username) + '">' + str(pagina.titulo) +'</a></li>'
-
-    #accesibilidad = '<form action="/" ><button type="submit">Página principal</button></form>'
-
     context = {'name': request.user.username,'aut': request.user.is_authenticated(),
                 'museos_accesibles': museos_accesibles, 'paginas_users': paginas_users}
     return render(request, 'accesibilidad.html', context)
-    #return HttpResponse(resp)
 
 
 
@@ -178,8 +156,8 @@ def cargarComentario(request):
 
 
                 return HttpResponseRedirect('/')
-            else:
-                print("IT IS NOT VALID")
+            #else:
+            #    print("IT IS NOT VALID")
 
         # if a GET (or any other method) we'll create a blank form
         else:
@@ -206,12 +184,6 @@ def detallesMuseo(request, identificador):
         return render(request, 'error.html', context)
 
     comentarios = Comentario.objects.filter(museo__nombre__contains=museo.nombre)
-    #if comentarios.count() != 0:
-    #    resp += comentarios[0].texto
-    #    print("Comentarios: " + comentarios[0].texto)
-    #else:
-    #    resp += "Museo sin comentarios, ¡se el primero en comentar!"
-
 
 
     if request.user.is_authenticated():
@@ -231,8 +203,8 @@ def detallesMuseo(request, identificador):
 
 
                 form = nuevoComentario()
-            else:
-                print("IT IS NOT VALID")
+            #else:
+            #    print("IT IS NOT VALID")
 
         # if a GET (or any other method) we'll create a blank form
         else:
@@ -242,19 +214,11 @@ def detallesMuseo(request, identificador):
         #museo = Seleccion.objects.get(museo=museo)
         seleccionado = True
         if seleccion.count() == 0:
-            print("ESTA VACIO")
+            #print("ESTA VACIO")
             seleccionado = False
-            #nueva_seleccion = Seleccion()
-            #nueva_seleccion.museo = museo
-            #user = User.objects.get(username=request.user.username)
-            #nueva_seleccion.user = user
-            #nueva_seleccion.save()
-        else:
-            print("SI ESTA SELECCIONADO")
+        #else:
+        #    print("SI ESTA SELECCIONADO")
 
-
-        #context = {'name': request.user.username,'aut': request.user.is_authenticated(),'form': form}
-        #return render(request, 'comentarios.html', context)
     else:
         form = None
         seleccionado = False
@@ -275,7 +239,7 @@ def gestionSeleccion(request, identificador):
         user = User.objects.get(username=request.user.username)
         nueva_seleccion.user = user
         nueva_seleccion.save()
-    print("Seleccion")
+    #print("Seleccion")
     return detallesMuseo(request, identificador)
 
     #return HttpResponse("Hola caracola")
@@ -286,9 +250,8 @@ def gestionDeseleccion(request, identificador):
     museo = Museo.objects.get(id=identificador)
     seleccion = Seleccion.objects.filter(user__username__contains=request.user.username).filter(museo__nombre__contains=museo.nombre)
     seleccion.delete()
-    print("Deseleccion")
+    #print("Deseleccion")
     return detallesMuseo(request, identificador)
-    #return HttpResponse("Hola caracola")
 
 
 
@@ -309,24 +272,11 @@ def prueba(request):
 def museosDistrito(request):
     if request.method == "GET":
         form = filtrarDistrito()
-        #distritos = set(Museo.objects.order_by('distrito'))
-        #distritos = Museo.objects..unique().values_list('distrito')
         distritos = set(Museo.objects.values_list('distrito',flat=True).order_by('distrito'))
-        #print(distritos)
         distritos2 = list(set(Museo.objects.all().values_list('distrito')))
-        #print(distritos2)
         museos = Museo.objects.all()
-        '''
-        resp = ""
-        for museo in museos:
-            #print(museo.nombre)
-            resp += '<li><a href="/museo/' + str(museo.id) + '">' + str(museo.nombre) + '</a></li>'
 
-        '''
         distrito = "Todos"
-        #context = {'form': form, 'lista_museos': museos, 'distrito': distrito}
-        #return render(request, 'barra_museos.html', context)
-    #return HttpResponse(resp)
     elif request.method == "POST":
         #print(form.errors)
         distrito = request.POST.get('distrito')
@@ -335,14 +285,9 @@ def museosDistrito(request):
         if distrito != "":
             print("Mi distrito: " + distrito)
             museos = Museo.objects.filter(distrito=distrito)
-
-            #return HttpResponseRedirect('/thanks/')
-            #context = {'form': form, 'lista_museos': museos_filtrados, 'distrito': distrito}
-            #return render(request, 'barra_museos.html', context)
         else:
             museos = Museo.objects.all()
             distrito = "Todos"
-            #return HttpResponse("Funciona mal!")
 
     context = {'name': request.user.username,'aut': request.user.is_authenticated(),
                 'form': form, 'lista_museos': museos, 'distrito': distrito}
@@ -359,8 +304,6 @@ def loginView(request):
 
         try:
             pagina_usuario = PaginaUser.objects.get(user=user)
-        #print(pagina_usuario.titulo)
-        #print(PaginaUser.objects.get(user=username))
         except ObjectDoesNotExist:
             titulo = "Pagina de " + username
             pagina_usuario = PaginaUser(user = user, titulo = titulo)
@@ -377,12 +320,7 @@ def loginView(request):
 def barra(request):
     if request.method == "GET":
         count_mess = Museo.objects.annotate(number_of_comments=Count('comentario')).filter(number_of_comments__gte=1).order_by('-number_of_comments')[:5]
-        #print("LLEGO HASTA AQUI")
-        #aux = number_of_comments.filter()
-        #print("Num comentarios primer : " + str(count_mess[0].number_of_comments))
-        #print(count_mess)
-        #resp = "<p><h2>Museos con más comentarios:</h2></p>"
-        print("Numero museos con comentarios: " + str(count_mess.count()))
+        #print("Numero museos con comentarios: " + str(count_mess.count()))
         if count_mess.count() != 0:
             resp = "<ol>"
             i = 0
@@ -396,24 +334,17 @@ def barra(request):
             resp += "</ol>"
 
         else:
-            resp += "No comments yet!</br></br>"
-
-        #resp += '<form method="link" action="/acces/">'
-        #resp += '<input type="button" value="Start"></form>'
-
-        #accesibilidad = '<form action="/acces/" ><button type="submit">Museos accesibles</button></form>'
+            resp = "No comments yet!</br></br>"
 
         paginas_users = PaginaUser.objects.all()
-        #pag = ""
-        #for pagina in paginas_users:
-        #    pag += '<li><a href="/' + str(pagina.user.username) + '">' + str(pagina.titulo) +'</a></li>'
-
-
-
 
         context = {'name': request.user.username,'aut': request.user.is_authenticated(), 'respuesta': resp, 'paginas_users': paginas_users}
         return render(request, 'barra.html', context)
-        #return HttpResponse(resp)
+
+
+def borrardb(request):
+    Museo.objects.all().delete()
+    return HttpResponseRedirect('/')
 
 
 def xmlParser(req):
@@ -552,6 +483,4 @@ def xmlParser(req):
         print("!!!!!!!!!!!!!!!!!!!!!!!!! Despues de guardar Museo !!!!!!!!!!!!!!!!!!!!!!!!!")
         nombre = descripcion = horario = transporte = accesibilidad = contentURL = None
         nombre_via = clase_vial = numero = localidad = cod_postal = barrio = distrito = telefono = email = None
-    #resp = "<a href=/xml>Cargar xml</a>"
-    #return HttpResponse(resp)
     return HttpResponseRedirect('/')

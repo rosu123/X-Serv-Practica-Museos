@@ -19,7 +19,8 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', 'museos.views.barra'),
-    url(r'^xml/$', 'museos.views.xmlParser'),
+    url(r'^xml$', 'museos.views.xmlParser'),
+    url(r'^borrar', 'museos.views.borrardb'),
     url(r'^comentario/', 'museos.views.cargarComentario'),
     url(r'^acces/', 'museos.views.museosAcc'),
     url(r'^.*style\.css$', 'museos.views.css'),

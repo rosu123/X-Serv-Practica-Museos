@@ -9,7 +9,6 @@ class Museo(models.Model):
     descripcion = models.TextField(null=True)
     horario = models.TextField(null=True)
     transporte = models.TextField(null=True)
-    #accesibilidad = models.BinaryField()
     accesibilidad = models.NullBooleanField(default=False, null=True)
     contentURL = models.URLField(null=True)
     nombreVia = models.CharField(max_length=64, null=True)
@@ -20,7 +19,6 @@ class Museo(models.Model):
     barrio = models.CharField(max_length=64, null=True)
     distrito = models.CharField(max_length=32, null=True)
     telefono = models.TextField(null=True)
-    #numero_comentarios = models.IntegerField(default=0)
     email = models.EmailField(null=True)
 
     def __str__(self):
@@ -60,7 +58,6 @@ class Comentario(models.Model):
 class Configuracion(models.Model):
     user = models.ForeignKey(User)
     tamano = models.IntegerField()
-    #letra = models.CharField(max_length=64)
     color = models.CharField(max_length=32)
 
     def __str__(self):

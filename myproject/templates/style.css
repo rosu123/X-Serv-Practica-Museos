@@ -35,3 +35,64 @@ footer {
   }
   .row.content {height:auto;}
 }
+
+
+#logout-form {
+    font-size: 20px;
+    color: #333;
+}
+
+
+#myNavbar {
+    border-color: #101010;
+    color: #333;
+    font-size: 14px;
+}
+
+
+#signin {
+   margin-top: 30px;
+   border-color: #101010;
+   color: #333;
+   font-size: 14px;
+}
+
+
+#banner {
+   box-sizing: border-box;
+   color: #333;
+   font-size: 14px;
+}
+
+
+#columnizq {
+   padding-top: 20px;
+   background-color: #f1f1f1;
+   height: 100%;
+   font-size: 14px;
+   color: #333;
+}
+
+#errormsg {
+   float: left;
+   padding-right: 15px;
+   padding-left: 15px;
+   font-size: 14px;
+   color: #333;
+   background-color: #fff;
+}
+
+
+#columnderch {
+   padding-right: 15px;
+   padding-left: 15px;
+   color: #333;
+   background-color: #fff;
+}
+
+
+#footer {
+   background-color: #555;
+   color: white;
+   padding: 15px;
+}
