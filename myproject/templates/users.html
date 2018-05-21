@@ -1,9 +1,13 @@
 {% extends "index.html" %}
 
+{% block opcioninicio %}
+   <li style="font-size:20px"><a href="/">Inicio</a></li>
+{% endblock %}
+
 {% block contenido %}
 {% if found %}
-        <section {% if not my_page %}class="all_page"{%endif%}>
-            <h1>Selección de {{ username }}</h1><br/>
+        <section {% if not userpropio %}class="all_page"{%endif%}>
+            <h1>{{ titulo.titulo }} (selección de {{ username }})</h1><br/>
 
             {% for s in selecciones %}
                 <a href="{{ s.museo.contentURL }}">{{ s.museo.nombre }}</a></br>
@@ -13,6 +17,7 @@
                 <p>Fecha de selección: {{ s.fecha }}</p>
                 <hr>
             {% endfor %}
+            <center><h4><a href="{{ username }}/xml">Canal XML </a></br></h4></center>
             <div id="cambio_pagina">
                 {% if not primera %}
                     <a class="boton" id="anterior" href="{{ username }}?pag={{ pag_ant }}">Página anterior</a>
@@ -27,4 +32,35 @@
             <h1>El usuario {{ username }} no existe</h1>
         </section>
     {% endif %}
+{% endblock %}
+
+
+{% block columnaderecha %}
+{% if userpropio %}
+<div id="secondarycontent">
+   <aside>
+               <h3>Cambiar CSS</h3></br>
+               <form method="post">
+                   <h5>Color de fondo</h5>
+                   <input class="textbox" type="text" name="color_css" value="white">
+                   <h5>Tamaño de letra</h5>
+                   <input class="textbox" type="text" name="tamano_css" value="14"><br/><br/>
+                   <input class="boton" type="submit" value="Enviar">
+               </form>
+           </aside>
+</div>
+{% endif %}
+{% endblock %}
+
+
+{% block columnaizquierda %}
+{% if userpropio %}
+<div id="secondarycontent">
+   <form method="post">
+       <br/><h3>Cambiar   nombre de la página</h3>
+       <input class="textbox" type="text" name="titulo" value="Pagina de {{ name }}">
+       <input class="boton" type="submit" value="Enviar">
+   </form>
+</div>
+{% endif %}
 {% endblock %}

@@ -27,6 +27,7 @@ urlpatterns = [
     url(r'^about/$', 'museos.views.about'),
     url(r'^.*login$', 'museos.views.loginView'),
     url(r'^.*logout$', logout, {'next_page': '/'}),
+    url(r'^(.*)/xml$', 'museos.views.xmlUser'),
     url(r'^seleccion/(\d+)', 'museos.views.gestionSeleccion'),
     url(r'^deseleccion/(\d+)', 'museos.views.gestionDeseleccion'),
     url(r'^prueba/$', 'museos.views.prueba'),

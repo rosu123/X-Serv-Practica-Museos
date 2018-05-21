@@ -1,5 +1,10 @@
 {% extends "index.html" %}
 
+{% block opcioninicio %}
+   <li style="font-size:20px"><a href="/">Inicio</a></li>
+{% endblock %}
+
+
 {% block contenido %}
 <div id="primarycontainer">
 	<div class="box">
@@ -21,7 +26,7 @@
 			<ul style="list-style-type:square">
 			{% if comentarios.count != 0 %}
 				{% for comentario in comentarios %}
-					 <li><b>{{ comentario.user.username }}</b>: {{ comentario.texto }}<br /><br /></li>
+					 <li>{{ comentario.texto }}<br /><br /></li>
 				{% endfor %}
 			{% else %}
 				<h4>Museo sin comentarios, ¡se el primero en hacerlo!<br /></h4>
@@ -40,7 +45,7 @@
 						  {% endif %}
 					 </div>
 				 {% endfor %}
-				 <input type="submit" value="Submit" />
+				 <input type="submit" value="Enviar" />
 			</form>
 			{% endif %}
 		</ul>

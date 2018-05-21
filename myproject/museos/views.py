@@ -24,6 +24,65 @@ XML_URL = 'https://datos.madrid.es/portal/site/egob/menuitem.ac61933d6ee3c31cae7
 
 
 
+def insertar_atributo_xml(child, atributo, valor):
+    atrib = ET.SubElement(child, 'atributo', {'nombre': atributo})
+    atrib.text = valor
+
+def insertar_museo_xml(child, museo):
+    insertar_atributo_xml(child, "NOMBRE", str(museo.nombre))
+    insertar_atributo_xml(child, "DESCRIPCION", str(museo.descripcion))
+    insertar_atributo_xml(child, "HORARIO", str(museo.horario))
+    insertar_atributo_xml(child, "TRANSPORTE", str(museo.transporte))
+    insertar_atributo_xml(child, "ACCESIBILIDAD", str(museo.accesibilidad))
+    insertar_atributo_xml(child, "URL", str(museo.contentURL))
+    insertar_atributo_xml(child, "DIRECCION", str(museo.claseVial) + " " + str(museo.nombreVia) + " " + str(museo.numero) + ", " + str(museo.codPostal) + " " + str(museo.localidad))
+    insertar_atributo_xml(child, "BARRIO", str(museo.barrio))
+    insertar_atributo_xml(child, "DISTRITO", str(museo.distrito))
+    insertar_atributo_xml(child, "CONTACTO", str(museo.telefono) + " / " + str(museo.email))
+
+#Ayuda: https://pymotw.com/2/xml/etree/ElementTree/create.html
+def xmlUser(request, username):
+    root = ET.Element('Contenidos')
+    selec = Seleccion.objects.filter(user__username=username)
+    for i in selec:
+        child = ET.SubElement(root, 'museo')
+        insertar_museo_xml(child, i.museo)
+    return HttpResponse(ET.tostring(root), content_type="text/xml")
+
+
+def css(request):
+    #template = get_template("style.css")
+    username = request.user.get_username()
+    try:
+        conf_usuario = PagUsuario.objects.get(user__username=username)
+        color = pag_usuario.color_css
+        tam = pag_usuario.tamano_css
+    except ObjectDoesNotExist:
+        color = COLOR_CSS_DEFAULT
+        tam = TAMANO_CSS_DEFAULT
+    context = Context({'tam': str(tam), 'color': color})
+    return HttpResponse(template.render(context), content_type="text/css")
+
+
+def actualizarDatos(request,username):
+    titulo = request.POST.get('titulo', False)
+    print("Titulo: " + str(titulo))
+    if titulo:
+        PaginaUser.objects.filter(user__username=username).update(titulo=titulo)
+    else:
+        print("Titulo vacio")
+
+
+def actualizarEstilo(request,username):
+    color_css = request.POST.get('color_css')
+    tamano_css = request.POST.get('tamano_css')
+    if color_css and tamano_css:
+        print("Nuevos tamaño y color en CSS")
+        conf_usuario = Configuracion(usuario=user, tamano_css=tamano_css, color_css=color_css)
+        conf_usuario.save()
+    else:
+        print("No se actualiza CSS")
+
 
 @csrf_exempt
 def user(request, username):
@@ -51,11 +110,19 @@ def user(request, username):
         fin = len(selec)
         ultima = True
 
-    my_page = request.user.is_authenticated() and (username == request.user.username)
+    if request.method == "POST" and request.user.is_authenticated():
+        actualizarDatos(request,username)
+        actualizarEstilo(request,username)
 
+    titulo = PaginaUser.objects.get(user__username=username)
+
+    userpropio = request.user.is_authenticated() and (username == request.user.username)
+
+    print("¿SOY EL DUEÑO?: " + str(userpropio))
     context = {'aut': request.user.is_authenticated(), 'name': request.user.username, 'found': found,
                 'selecciones': selec[inicio:fin], 'ultima': ultima, 'primera': (pag == 1),
-                'pag_sig': str(pag + 1), 'pag_ant': str(pag - 1), 'username': username}
+                'pag_sig': str(pag + 1), 'pag_ant': str(pag - 1), 'username': username,
+                'userpropio': userpropio,'titulo': titulo}
     return render(request, 'users.html', context)
 
 
@@ -222,7 +289,7 @@ def gestionDeseleccion(request, identificador):
 def about(request):
     resp = "<br>Autor: Rodrigo Perela Posada</br>"
     resp += "<br>ITT-IAA ETSIT</br>"
-    context = {'respuesta': resp}
+    context = {'name': request.user.username,'aut': request.user.is_authenticated(),'respuesta': resp}
     return render(request, 'about.html', context)
 
 
@@ -292,14 +359,6 @@ def loginView(request):
             pagina_usuario = PaginaUser(user = user, titulo = titulo)
             pagina_usuario.save()
 
-        """
-
-        if PaginaUser.objects.get(user=username):
-            print("EXISTE")
-
-        else:
-            print("NO EXISTE")
-        """
         return HttpResponseRedirect('/')
     else:
         return HttpResponseRedirect('/')

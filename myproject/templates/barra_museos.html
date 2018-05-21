@@ -1,5 +1,9 @@
 {% extends "index.html" %}
 
+{% block opcioninicio %}
+   <li style="font-size:20px"><a href="/">Inicio</a></li>
+{% endblock %}
+
 
    {% block seleccionador %}
    <div id="primarycontainer">
@@ -11,7 +15,7 @@
                <div class="fieldWrapper">
                   {{ form.as_p }}
                </div>
-               <input type="submit" value="Submit" />
+               <input type="submit" value="Enviar" />
             </form>
          <hr />
       </div>

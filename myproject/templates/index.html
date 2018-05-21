@@ -4,10 +4,13 @@
   <title>Museos de Madrid</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  {% load static %}
+  <link href="{% static "style.css" %}" rel="stylesheet" type="text/css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <style>
+  <!--<style>
     /* Remove the navbar's default margin-bottom and rounded borders */
     .navbar {
       margin-bottom: 0;
@@ -39,7 +42,7 @@
       }
       .row.content {height:auto;}
     }
-  </style>
+  </style>-->
 </head>
 <body>
 
@@ -56,10 +59,12 @@
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav" style="min-height:75px;margin-top:20px;">
+
         <li  class="" style="font-size:20px;margin-bottom:-10px"><a href="/museos">Todos</a></li>
-        <li style="font-size:20px"><a href="#">About</a></li>
-        <li style="font-size:20px"><a href="#">Projects</a></li>
-        <li style="font-size:20px"><a href="#">Contact</a></li>
+        <li style="font-size:20px"><a href="/about/">About</a></li>
+        {% block opcioninicio %}{% endblock %}
+        <!--<li style="font-size:20px"><a href="#">Projects</a></li>-->
+        <!--<li style="font-size:20px"><a href="#">Contact</a></li>-->
       </ul>
       {% if aut %}
          <ul class="nav navbar-nav navbar-right" style="margin-top:20px">
@@ -94,20 +99,20 @@
 </nav>
 
 
-<div class="tm-home-img-container">
+<div id="banner" class="tm-home-img-container">
     <center><img src="{% static "img/banner.jpg" %}" alt="Image" style="width:1500px;height:auto"></center>
 </div>
 
 
 <div class="container-fluid text-center">
   <div class="row content">
-    <div class="col-sm-2 sidenav">
+    <div id="columnizq" class="col-sm-2 sidenav">
       <p>{% block columnaizquierda %}{% endblock %}</p>
       <!--<p><a href="#">Link</a></p>
       <p><a href="#">Link</a></p>
       <p><a href="#">Link</a></p>-->
     </div>
-    <div class="col-sm-8 text-left">
+    <div id="errormsg"class="col-sm-8 text-left">
       {% block errorMsg %}{% endblock %}
       <!--<h1>Welcome</h1>
       <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
@@ -120,7 +125,7 @@
       <!--<h3>Test</h3>
       <p>Lorem ipsum...</p>-->
     </div>
-    <div class="col-sm-2 sidenav">
+    <div id="columnderch" class="col-sm-2 sidenav">
       <div class="well">
         <p>{% block columnaderecha %}{% endblock %}</p>
       </div>

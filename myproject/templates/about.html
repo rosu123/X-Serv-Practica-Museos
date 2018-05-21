@@ -1,7 +1,17 @@
+{% extends "index.html" %}
 
+
+{% block opcioninicio %}
+   <li style="font-size:20px"><a href="/">Inicio</a></li>
+{% endblock %}
+
+
+
+{% block contenido %}
 <div id="primarycontainer">
 	<div class="box">
 		<br/><h2><center><em>{{ respuesta|safe }}</em></center></h2><br/>
 		<hr />
 	</div>
 </div>
+{% endblock %}

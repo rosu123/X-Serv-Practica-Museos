@@ -60,5 +60,5 @@ class Comentario(models.Model):
 class Configuracion(models.Model):
     user = models.ForeignKey(User)
     tamano = models.IntegerField()
-    letra = models.CharField(max_length=64)
+    #letra = models.CharField(max_length=64)
     color = models.CharField(max_length=32)
